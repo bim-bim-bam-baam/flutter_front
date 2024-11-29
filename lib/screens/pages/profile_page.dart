@@ -8,8 +8,12 @@ class ProfilePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.deepPurple[50], // Фон страницы
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: const Text(
+          'Profile',
+          style: TextStyle(color: Colors.white), // Белый текст заголовка
+        ),
         backgroundColor: Colors.deepPurple,
+        iconTheme: const IconThemeData(color: Colors.white), // Белая иконка "Назад"
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

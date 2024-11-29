@@ -32,8 +32,12 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
       backgroundColor: Colors.deepPurple[50],
       appBar: AppBar(
-        title: Text(widget.chatName),
+        title: Text(
+          widget.chatName,
+          style: const TextStyle(color: Colors.white), // Белый текст заголовка
+        ),
         backgroundColor: Colors.deepPurple,
+        iconTheme: const IconThemeData(color: Colors.white), // Белая стрелка "Назад"
       ),
       body: Column(
         children: [
@@ -46,8 +50,7 @@ class _ChatPageState extends State<ChatPage> {
                 final message = _messages[index];
                 final isMe = message['sender'] == 'You';
                 return Align(
-                  alignment:
-                      isMe ? Alignment.centerRight : Alignment.centerLeft,
+                  alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                   child: Card(
                     color: isMe ? Colors.deepPurple : Colors.white,
                     shape: RoundedRectangleBorder(
