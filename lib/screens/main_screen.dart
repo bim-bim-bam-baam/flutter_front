@@ -16,11 +16,11 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _pages = [
     const TestsPage(), // Tests
-    const PeoplePage(), // Home
+    const PeoplePage(), // People
     const MessengerPage(), // Messenger
   ];
 
-  final List<String> _titles = ['Tests', 'Home', 'Messenger'];
+  final List<String> _titles = ['Tests', 'People', 'Messenger']; // Обновленные заголовки
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,7 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: Colors.black,
         actions: [
           IconButton(
-            icon: const Icon(Icons.person),
+            icon: const Icon(Icons.person, color: Colors.green),
             onPressed: () {
               Navigator.push(
                 context,
@@ -59,6 +59,9 @@ class _MainScreenState extends State<MainScreen> {
             _currentIndex = index;
           });
         },
+        backgroundColor: Colors.black,
+        selectedItemColor: Colors.green,
+        unselectedItemColor: Colors.purple,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.library_books),
@@ -66,7 +69,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.people),
-            label: 'Home',
+            label: 'People', // Обновлено название
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message),

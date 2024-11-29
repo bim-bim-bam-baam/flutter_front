@@ -39,7 +39,7 @@ class _PeoplePageState extends State<PeoplePage> {
     filteredPeople.sort((a, b) => b['similarity'].compareTo(a['similarity']));
 
     return Scaffold(
-      backgroundColor: Colors.deepPurple[50],
+      backgroundColor: Colors.black, // Фон страницы черный
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -49,10 +49,17 @@ class _PeoplePageState extends State<PeoplePage> {
               value: _selectedAgeGroup,
               decoration: InputDecoration(
                 labelText: 'Filter by Age',
+                labelStyle: const TextStyle(color: Colors.white),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.green),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
+              dropdownColor: Colors.grey[900],
+              style: const TextStyle(color: Colors.white),
               items: _ageGroups
                   .map((group) => DropdownMenuItem(
                         value: group,
@@ -76,26 +83,41 @@ class _PeoplePageState extends State<PeoplePage> {
                 itemBuilder: (context, index) {
                   final person = filteredPeople[index];
                   return Card(
-                    elevation: 8,
+                    color: Colors.grey[900],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                     margin: const EdgeInsets.symmetric(vertical: 8),
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: Colors.deepPurple,
+                        backgroundColor: Colors.purple,
                         child: Text(
                           person['name'][0], // Первая буква имени
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      title: Text(person['name']),
-                      subtitle: Text(
-                          'Similarity: ${person['similarity']}%\nAge: ${person['age']}'),
-                      trailing: Icon(
-                        Icons.check_circle,
-                        color: Colors.deepPurple,
+                      title: Text(
+                        person['name'],
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
+                      subtitle: Text(
+                        'Similarity: ${person['similarity']}%\nAge: ${person['age']}',
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                      trailing: const Icon(
+                        Icons.check_circle,
+                        color: Colors.green,
+                      ),
+                      onTap: () {
+                        // Логика при нажатии на карточку
+                      },
                     ),
                   );
                 },

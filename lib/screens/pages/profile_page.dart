@@ -6,14 +6,18 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepPurple[50], // Фон страницы
+      backgroundColor: const Color(0xFF121212), // Черный фон
       appBar: AppBar(
         title: const Text(
           'Profile',
-          style: TextStyle(color: Colors.white), // Белый текст заголовка
+          style: TextStyle(
+            color: Colors.white, // Белый текст заголовка
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        backgroundColor: Colors.deepPurple,
-        iconTheme: const IconThemeData(color: Colors.white), // Белая иконка "Назад"
+        backgroundColor: const Color(0xFF1E1E1E), // Темный AppBar
+        iconTheme: const IconThemeData(color: Color(0xFF4ADE80)), // Зеленая иконка "Назад"
+        elevation: 4,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -25,11 +29,11 @@ class ProfilePage extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 50,
-                    backgroundColor: Colors.deepPurple,
+                    backgroundColor: const Color(0xFF4ADE80), // Мягкий зеленый
                     child: const Icon(
                       Icons.person,
                       size: 50,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -38,7 +42,7 @@ class ProfilePage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
+                      color: Colors.white, // Белый текст
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -46,7 +50,7 @@ class ProfilePage extends StatelessWidget {
                     'Flutter Developer',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.deepPurpleAccent,
+                      color: Colors.white70, // Мягкий белый
                     ),
                   ),
                 ],
@@ -62,6 +66,7 @@ class ProfilePage extends StatelessWidget {
                     context,
                     icon: Icons.edit,
                     title: 'Edit Profile',
+                    color: const Color(0xFF4ADE80), // Зеленый акцент
                     onTap: () {
                       // Логика редактирования профиля
                     },
@@ -71,6 +76,7 @@ class ProfilePage extends StatelessWidget {
                     context,
                     icon: Icons.settings,
                     title: 'Settings',
+                    color: const Color(0xFFBB86FC), // Фиолетовый акцент
                     onTap: () {
                       // Логика настроек
                     },
@@ -80,8 +86,8 @@ class ProfilePage extends StatelessWidget {
                     context,
                     icon: Icons.logout,
                     title: 'Logout',
+                    color: const Color(0xFF4ADE80), // Зеленый акцент
                     onTap: () {
-                      // Логика выхода из системы
                       _showLogoutDialog(context);
                     },
                   ),
@@ -96,21 +102,23 @@ class ProfilePage extends StatelessWidget {
 
   // Виджет кнопки профиля
   Widget _buildProfileOption(BuildContext context,
-      {required IconData icon, required String title, required VoidCallback onTap}) {
+      {required IconData icon, required String title, required Color color, required VoidCallback onTap}) {
     return Card(
+      color: const Color(0xFF1E1E1E), // Темный фон карточки
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: Colors.deepPurple,
-          child: Icon(icon, color: Colors.white),
+          backgroundColor: color, // Цвет акцента
+          child: Icon(icon, color: Colors.black), // Черная иконка
         ),
         title: Text(
           title,
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
+            color: Colors.white,
           ),
         ),
         onTap: onTap,
@@ -124,14 +132,24 @@ class ProfilePage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Logout'),
-          content: const Text('Are you sure you want to logout?'),
+          backgroundColor: const Color(0xFF1E1E1E), // Темный фон
+          title: const Text(
+            'Logout',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: const Text(
+            'Are you sure you want to logout?',
+            style: TextStyle(color: Colors.white70),
+          ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Закрыть диалог
               },
-              child: const Text('Cancel'),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Color(0xFF4ADE80)), // Зеленый текст
+              ),
             ),
             ElevatedButton(
               onPressed: () {
@@ -142,9 +160,12 @@ class ProfilePage extends StatelessWidget {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
+                backgroundColor: const Color(0xFF4ADE80), // Зеленая кнопка
               ),
-              child: const Text('Logout'),
+              child: const Text(
+                'Logout',
+                style: TextStyle(color: Colors.black), // Черный текст
+              ),
             ),
           ],
         );
