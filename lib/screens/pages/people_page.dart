@@ -9,30 +9,27 @@ class PeoplePage extends StatefulWidget {
 
 class _PeoplePageState extends State<PeoplePage> {
   final List<Map<String, dynamic>> _people = [
-    {'name': 'Alice', 'similarity': 95, 'age': 25, 'bio': 'Loves hiking and painting.'},
-    {'name': 'Bob', 'similarity': 88, 'age': 30, 'bio': 'Enjoys cycling and jazz music.'},
-    {'name': 'Charlie', 'similarity': 80, 'age': 22, 'bio': 'Aspiring chef and foodie.'},
-    {'name': 'Diana', 'similarity': 75, 'age': 27, 'bio': 'Tech enthusiast and gamer.'},
+    {'name': 'Alice', 'similarity': 95, 'age': 25, 'category': 'Music', 'bio': 'Loves hiking and painting.'},
+    {'name': 'Bob', 'similarity': 88, 'age': 30, 'category': 'Sports', 'bio': 'Enjoys cycling and jazz music.'},
+    {'name': 'Charlie', 'similarity': 80, 'age': 22, 'category': 'Books', 'bio': 'Aspiring chef and foodie.'},
+    {'name': 'Diana', 'similarity': 75, 'age': 27, 'category': 'Movies', 'bio': 'Tech enthusiast and gamer.'},
   ];
 
-  String _selectedAgeGroup = 'All Ages';
-  final List<String> _ageGroups = ['All Ages', '18-25', '26-35', '36+'];
+  String _selectedCategory = 'All Categories';
+  bool _isDescending = true;
+
+  final List<String> _categories = ['All Categories', 'Music', 'Movies', 'Books', 'Sports'];
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>> filteredPeople = _people;
+    // Фильтруем людей по выбранной категории
+    List<Map<String, dynamic>> filteredPeople = _selectedCategory == 'All Categories'
+        ? _people
+        : _people.where((person) => person['category'] == _selectedCategory).toList();
 
-    if (_selectedAgeGroup != 'All Ages') {
-      filteredPeople = _people.where((person) {
-        final age = person['age'] as int;
-        if (_selectedAgeGroup == '18-25') return age >= 18 && age <= 25;
-        if (_selectedAgeGroup == '26-35') return age >= 26 && age <= 35;
-        if (_selectedAgeGroup == '36+') return age > 35;
-        return true;
-      }).toList();
-    }
-
-    filteredPeople.sort((a, b) => b['similarity'].compareTo(a['similarity']));
+    // Сортируем список по схожести
+    filteredPeople.sort((a, b) =>
+        _isDescending ? b['similarity'].compareTo(a['similarity']) : a['similarity'].compareTo(b['similarity']));
 
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
@@ -40,39 +37,57 @@ class _PeoplePageState extends State<PeoplePage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            DropdownButtonFormField<String>(
-              value: _selectedAgeGroup,
-              decoration: InputDecoration(
-                labelText: 'Filter by Age',
-                labelStyle: const TextStyle(color: Colors.white),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+            Row(
+              children: [
+                // Фильтр категорий
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _selectedCategory,
+                    decoration: InputDecoration(
+                      labelText: 'Filter by Category',
+                      labelStyle: const TextStyle(color: Colors.white),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Color(0xFFBB86FC)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    dropdownColor: const Color(0xFF1E1E1E),
+                    style: const TextStyle(color: Colors.white),
+                    items: _categories
+                        .map((category) => DropdownMenuItem(
+                              value: category,
+                              child: Text(category),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _selectedCategory = value;
+                        });
+                      }
+                    },
+                  ),
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color(0xFFBB86FC)),
-                  borderRadius: BorderRadius.circular(12),
+                const SizedBox(width: 10),
+                // Кнопка сортировки
+                IconButton(
+                  icon: Icon(
+                    _isDescending ? Icons.arrow_downward : Icons.arrow_upward,
+                    color: const Color(0xFFBB86FC),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isDescending = !_isDescending;
+                    });
+                  },
                 ),
-              ),
-              dropdownColor: const Color(0xFF1E1E1E),
-              style: const TextStyle(color: Colors.white),
-              items: _ageGroups
-                  .map((group) => DropdownMenuItem(
-                        value: group,
-                        child: Text(
-                          group,
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    _selectedAgeGroup = value;
-                  });
-                }
-              },
+              ],
             ),
             const SizedBox(height: 20),
+            // Список людей
             Expanded(
               child: ListView.builder(
                 itemCount: filteredPeople.length,
@@ -116,9 +131,36 @@ class _PeoplePageState extends State<PeoplePage> {
                           color: Colors.white70,
                         ),
                       ),
-                      trailing: const Icon(
-                        Icons.arrow_forward,
-                        color: Color(0xFFBB86FC),
+                      trailing: IconButton(
+                        icon: Stack(
+                          children: [
+                            const Icon(
+                              Icons.mail,
+                              size: 28,
+                              color: Color(0xFFBB86FC),
+                            ),
+                            Positioned(
+                              right: -2,
+                              bottom: -2,
+                              child: Container(
+                                width: 12,
+                                height: 12,
+                                decoration: const BoxDecoration(
+                                  color: Colors.black,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.add,
+                                  size: 12,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        onPressed: () {
+                          // Логика отправки сообщения
+                        },
                       ),
                       onTap: () {
                         _showPersonDetails(context, person);
@@ -134,7 +176,7 @@ class _PeoplePageState extends State<PeoplePage> {
     );
   }
 
-void _showPersonDetails(BuildContext context, Map<String, dynamic> person) {
+  void _showPersonDetails(BuildContext context, Map<String, dynamic> person) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -147,7 +189,6 @@ void _showPersonDetails(BuildContext context, Map<String, dynamic> person) {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Иконка закрытия в верхнем правом углу
                 Align(
                   alignment: Alignment.topRight,
                   child: IconButton(
@@ -155,7 +196,6 @@ void _showPersonDetails(BuildContext context, Map<String, dynamic> person) {
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
-                const SizedBox(height: 10),
                 CircleAvatar(
                   radius: 60,
                   backgroundColor: const Color(0xFFBB86FC),
@@ -212,35 +252,22 @@ void _showPersonDetails(BuildContext context, Map<String, dynamic> person) {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    // Кнопка "Invite Message"
-                    ElevatedButton(
-                      onPressed: () {
-                        // Логика отправки приглашения
-                        Navigator.pop(context); // Закрыть окно (опционально)
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFBB86FC),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 30,
-                          vertical: 12,
-                        ),
-                      ),
-                      child: const Text(
-                        'Invite Message',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFBB86FC),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ],
+                  ),
+                  child: const Text(
+                    'Invite Message',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
                 ),
               ],
             ),
