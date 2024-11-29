@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/constants/constants.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
@@ -84,7 +85,7 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://localhost:8080/api/user/updateAvatar'),
+        Uri.parse('$baseUrl/user/updateAvatar'),
       );
       request.headers['Authorization'] = 'Bearer $token';
       request.files
@@ -122,7 +123,8 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
         backgroundColor: const Color(0xFF1E1E1E), // Темный AppBar
-        iconTheme: const IconThemeData(color: Color(0xFF64FFDA)), // Зеленая иконка "Назад"
+        iconTheme: const IconThemeData(
+            color: Color(0xFF64FFDA)), // Зеленая иконка "Назад"
         elevation: 4,
       ),
       body: Padding(
@@ -136,7 +138,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     onTap: _pickAvatar,
                     child: CircleAvatar(
                       radius: 50,
-                      backgroundColor: const Color(0xFF64FFDA), // Мягкий зеленый фон
+                      backgroundColor:
+                          const Color(0xFF64FFDA), // Мягкий зеленый фон
                       backgroundImage: avatar != null
                           ? FileImage(avatar!)
                           : (avatarUrl != null
@@ -180,7 +183,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   _buildProfileOption(
                     icon: Icons.edit,
                     title: 'Edit Profile',
-                    backgroundColor: const Color(0xFF1F2937), // Темно-зеленый фон
+                    backgroundColor:
+                        const Color(0xFF1F2937), // Темно-зеленый фон
                     shadowColor: const Color(0xFF64FFDA), // Зеленая тень
                     onTap: () {
                       // Логика редактирования профиля
@@ -190,7 +194,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   _buildProfileOption(
                     icon: Icons.settings,
                     title: 'Settings',
-                    backgroundColor: const Color(0xFF2D2D34), // Темно-фиолетовый фон
+                    backgroundColor:
+                        const Color(0xFF2D2D34), // Темно-фиолетовый фон
                     shadowColor: const Color(0xFFBB86FC), // Фиолетовая тень
                     onTap: () {
                       // Логика настроек
@@ -200,7 +205,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   _buildProfileOption(
                     icon: Icons.logout,
                     title: 'Logout',
-                    backgroundColor: const Color(0xFF1F2937), // Темно-зеленый фон
+                    backgroundColor:
+                        const Color(0xFF1F2937), // Темно-зеленый фон
                     shadowColor: const Color(0xFF64FFDA), // Зеленая тень
                     onTap: () {
                       _showLogoutDialog(context);
@@ -280,7 +286,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 Navigator.of(context).pop(); // Закрыть диалог
                 Navigator.of(context).pushNamedAndRemoveUntil(
                   '/login',
-                  (Route<dynamic> route) => false, // Удалить все предыдущие маршруты
+                  (Route<dynamic> route) =>
+                      false, // Удалить все предыдущие маршруты
                 );
               },
               style: ElevatedButton.styleFrom(

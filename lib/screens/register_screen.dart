@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/constants/constants.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -22,7 +23,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    final Uri url = Uri.parse('http://10.124.22.176:8080/api/user/register');
+    final Uri url = Uri.parse('$baseUrl/register');
     try {
       final response = await http.post(
         url,
@@ -120,7 +121,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     decoration: InputDecoration(
                       labelText: 'Username',
                       labelStyle: const TextStyle(color: Colors.white),
-                      prefixIcon: const Icon(Icons.person, color: Color(0xFFBB86FC)),
+                      prefixIcon:
+                          const Icon(Icons.person, color: Color(0xFFBB86FC)),
                       filled: true,
                       fillColor: const Color(0xFF2E2E2E),
                       border: OutlineInputBorder(
@@ -140,7 +142,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     decoration: InputDecoration(
                       labelText: 'Password',
                       labelStyle: const TextStyle(color: Colors.white),
-                      prefixIcon: const Icon(Icons.lock, color: Color(0xFFBB86FC)),
+                      prefixIcon:
+                          const Icon(Icons.lock, color: Color(0xFFBB86FC)),
                       filled: true,
                       fillColor: const Color(0xFF2E2E2E),
                       border: OutlineInputBorder(

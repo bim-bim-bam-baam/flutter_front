@@ -1,5 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:swipe_cards/swipe_cards.dart';
+
+import '../../constants/constants.dart';
 
 class TestsPage extends StatefulWidget {
   const TestsPage({super.key});
@@ -9,72 +13,60 @@ class TestsPage extends StatefulWidget {
 }
 
 class _TestsPageState extends State<TestsPage> {
-  String _selectedCategory = 'Music';
-  final List<String> _categories = ['Music', 'Movies', 'Books', 'Sports'];
-
-  final Map<String, List<String>> _questionsByCategory = {
-    'Music': [
-      'Rock or Rap?',
-      'Classical or Pop?',
-      'Jazz or Blues?',
-      'EDM or Hip-hop?',
-      'Indie or Alternative?',
-      'Country or Folk?',
-      'Live Concerts or Studio Recordings?',
-      'Piano or Guitar?',
-      'Solo Artists or Bands?',
-      'Vinyl or Digital?'
-    ],
-    'Movies': [
-      'Action or Comedy?',
-      'Horror or Drama?',
-      'Sci-Fi or Fantasy?',
-      'Romance or Thriller?',
-      'Superhero Movies or Documentaries?',
-      'Classic Movies or Modern Films?',
-      'Animated or Live-Action?',
-      'Subtitles or Dubbed?',
-      'Independent Films or Blockbusters?',
-      'Series or Movies?'
-    ],
-    'Books': [
-      'Fiction or Non-Fiction?',
-      'Mystery or Romance?',
-      'Biography or History?',
-      'Fantasy or Science Fiction?',
-      'Poetry or Prose?',
-      'Novels or Short Stories?',
-      'E-books or Paperbacks?',
-      'Libraries or Bookstores?',
-      'Self-Help or Philosophy?',
-      'Comics or Graphic Novels?'
-    ],
-    'Sports': [
-      'Football or Basketball?',
-      'Tennis or Golf?',
-      'Running or Swimming?',
-      'Team Sports or Solo Sports?',
-      'Gym or Outdoor Activities?',
-      'Winter Sports or Summer Sports?',
-      'Cycling or Hiking?',
-      'Formula 1 or MotoGP?',
-      'Martial Arts or Yoga?',
-      'Cricket or Baseball?'
-    ],
-  };
-
+  String _selectedCategory = '';
+  List<String> _categories = [];
+  List<String> _questions = [];
   late List<SwipeItem> _swipeItems;
   late MatchEngine _matchEngine;
 
   @override
   void initState() {
     super.initState();
-    _initializeSwipeItems();
+    _loadCategories();
   }
 
+  // Получаем все категории с бекенда
+  Future<void> _loadCategories() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/category/all'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as List;
+        setState(() {
+          _categories =
+              data.map((category) => category['name'] as String).toList();
+        });
+      } else {
+        throw Exception('Failed to load categories');
+      }
+    } catch (e) {
+      print('Error loading categories: $e');
+    }
+  }
+
+  // Получаем следующий вопрос для выбранной категории
+  Future<void> _loadNextQuestion(String categoryId) async {
+    try {
+      final response = await http
+          .get(Uri.parse('$baseUrl/question/getNextQuestion?id=$categoryId'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data != null && data['question'] != null) {
+          setState(() {
+            _questions.add(data['question'] as String);
+            _initializeSwipeItems();
+          });
+        }
+      } else {
+        throw Exception('Failed to load question');
+      }
+    } catch (e) {
+      print('Error loading question: $e');
+    }
+  }
+
+  // Инициализация карточек для Swipe
   void _initializeSwipeItems() {
-    final questions = _questionsByCategory[_selectedCategory] ?? [];
-    _swipeItems = questions.map((question) {
+    _swipeItems = _questions.map((question) {
       return SwipeItem(
         content: question,
         likeAction: () => print('Liked: $question'),
@@ -85,21 +77,8 @@ class _TestsPageState extends State<TestsPage> {
     _matchEngine = MatchEngine(swipeItems: _swipeItems);
   }
 
-  void _skipCard() {
-    if (_matchEngine.currentItem != null) {
-      setState(() {
-        final skippedItem = _swipeItems.removeAt(0);
-        _swipeItems.add(skippedItem);
-        _matchEngine = MatchEngine(swipeItems: _swipeItems);
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       body: Padding(
@@ -128,11 +107,13 @@ class _TestsPageState extends State<TestsPage> {
                         child: Text(category),
                       ))
                   .toList(),
-              onChanged: (value) {
+              onChanged: (value) async {
                 if (value != null) {
                   setState(() {
                     _selectedCategory = value;
-                    _initializeSwipeItems();
+                    _questions.clear();
+                    _loadNextQuestion(
+                        value); // Получаем первый вопрос для выбранной категории
                   });
                 }
               },
@@ -141,199 +122,61 @@ class _TestsPageState extends State<TestsPage> {
 
             // Карточки Swipe
             Expanded(
-              child: SwipeCards(
-                matchEngine: _matchEngine,
-                itemBuilder: (context, index) {
-                  final question = _swipeItems[index].content as String;
+              child: _swipeItems.isEmpty
+                  ? Center(child: CircularProgressIndicator())
+                  : SwipeCards(
+                      matchEngine: _matchEngine,
+                      itemBuilder: (context, index) {
+                        final question = _swipeItems[index].content as String;
 
-                  // Разделение текста на левые и правые варианты
-                  final parts = question.split(' or ');
-                  final leftOption = parts.isNotEmpty ? parts[0] : 'Option 1';
-                  final rightOption = parts.length > 1 ? parts[1] : 'Option 2';
+                        // Разделение текста на левые и правые варианты
+                        final parts = question.split(' or ');
+                        final leftOption =
+                            parts.isNotEmpty ? parts[0] : 'Option 1';
+                        final rightOption =
+                            parts.length > 1 ? parts[1] : 'Option 2';
 
-                  // Проверка длины текста для определения наложения
-                  final TextPainter leftTextPainter = TextPainter(
-                    text: TextSpan(
-                      text: leftOption,
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    textDirection: TextDirection.ltr,
-                  )..layout();
-                  final TextPainter rightTextPainter = TextPainter(
-                    text: TextSpan(
-                      text: rightOption,
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    textDirection: TextDirection.ltr,
-                  )..layout();
-
-                  final double textOverlapThreshold = screenWidth * 0.4;
-                  final bool textOverlap =
-                      leftTextPainter.width + rightTextPainter.width >
-                      textOverlapThreshold;
-
-                  return Container(
-                    width: screenWidth * 0.9,
-                    height: screenHeight * 0.7,
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.green.withOpacity(0.5),
-                          blurRadius: 20,
-                          offset: const Offset(-5, 5),
-                        ),
-                        BoxShadow(
-                          color: Colors.purple.withOpacity(0.5),
-                          blurRadius: 20,
-                          offset: const Offset(5, 5),
-                        ),
-                      ],
-                    ),
-                    child: Stack(
-                      children: [
-                        // Вопрос сверху карточки
-                        Positioned(
-                          top: screenHeight * 0.05,
-                          left: 20,
-                          right: 20,
-                          child: Text(
-                            question,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: question.length > 20 ? 28 : 36,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              shadows: const [
-                                Shadow(
-                                  color: Colors.white,
-                                  blurRadius: 10,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        // Левый вариант выбора
-                        Positioned(
-                          left: 20,
-                          top: textOverlap
-                              ? screenHeight * 0.3
-                              : screenHeight * 0.35,
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.arrow_back,
-                                color: Color(0xFF64FFDA),
-                                size: 28,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                leftOption,
-                                style: const TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF64FFDA),
-                                  shadows: [
-                                    Shadow(
-                                      color: Color(0xFF64FFDA),
-                                      blurRadius: 10,
-                                    ),
-                                  ],
-                                ),
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.green.withOpacity(0.5),
+                                blurRadius: 20,
+                                offset: const Offset(-5, 5),
                               ),
                             ],
                           ),
-                        ),
-
-                        // Правый вариант выбора
-                        Positioned(
-                          right: 20,
-                          top: textOverlap
-                              ? screenHeight * 0.4
-                              : screenHeight * 0.35,
-                          child: Row(
+                          child: Stack(
                             children: [
-                              Text(
-                                rightOption,
-                                style: const TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFFBB86FC),
-                                  shadows: [
-                                    Shadow(
-                                      color: Color(0xFFBB86FC),
-                                      blurRadius: 10,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Icon(
-                                Icons.arrow_forward,
-                                color: Color(0xFFBB86FC),
-                                size: 28,
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // Кнопка "Не знаю"
-                        Positioned(
-                          bottom: 20,
-                          left: 0,
-                          right: 0,
-                          child: Center(
-                            child: ElevatedButton(
-                              onPressed: _skipCard,
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 14,
-                                ),
-                                backgroundColor: const Color(0xFF1E1E1E),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                side: const BorderSide(color: Colors.white),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Icon(Icons.help_outline, color: Colors.white),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Не знаю',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                              // Вопрос сверху карточки
+                              Positioned(
+                                top: 20,
+                                left: 20,
+                                right: 20,
+                                child: Text(
+                                  question,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ),
-                      ],
+                        );
+                      },
+                      onStackFinished: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('No more questions')),
+                        );
+                      },
+                      upSwipeAllowed: false,
+                      fillSpace: false,
                     ),
-                  );
-                },
-                onStackFinished: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('No more questions')),
-                  );
-                },
-                upSwipeAllowed: false,
-                fillSpace: false,
-              ),
             ),
           ],
         ),
