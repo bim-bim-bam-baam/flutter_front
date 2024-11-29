@@ -14,12 +14,42 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Navigation Demo',
+      title: 'Flutter Neon App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: Colors.black, // Основной фон черный
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.black,
+          elevation: 0,
+          centerTitle: true,
+          titleTextStyle: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white, // Белый текст AppBar
+          ),
+          iconTheme: IconThemeData(color: Colors.green), // Иконки AppBar
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Colors.black,
+          selectedItemColor: Colors.green, // Зеленый активный элемент
+          unselectedItemColor: Colors.purple, // Фиолетовый неактивный элемент
+        ),
+        textTheme: const TextTheme(
+          bodyMedium: TextStyle(color: Colors.white), // Белый текст по умолчанию
+        ),
+        iconTheme: const IconThemeData(color: Colors.green), // Зеленые иконки по умолчанию
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.black,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 10,
+            side: const BorderSide(color: Colors.purple, width: 2), // Фиолетовая рамка кнопок
+          ),
+        ),
       ),
-      initialRoute: '/login',
+      initialRoute: '/home',
       routes: {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),

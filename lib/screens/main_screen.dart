@@ -16,7 +16,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _pages = [
     const TestsPage(), // Tests
-    const PeoplePage(),  // Home
+    const PeoplePage(), // Home
     const MessengerPage(), // Messenger
   ];
 
@@ -28,24 +28,28 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: Text(
           _titles[_currentIndex],
-          style: const TextStyle(color: Colors.white), // Белый текст заголовка
+          style: const TextStyle(
+            color: Colors.white,
+            shadows: [
+              Shadow(
+                color: Colors.green,
+                blurRadius: 5,
+              ),
+            ],
+          ),
         ),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.black,
         actions: [
           IconButton(
-            icon: const Icon(Icons.person, color: Colors.white), // Белая иконка профиля
+            icon: const Icon(Icons.person),
             onPressed: () {
-              // Переход на страницу профиля
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const ProfilePage(),
-                ),
+                MaterialPageRoute(builder: (context) => const ProfilePage()),
               );
             },
           ),
         ],
-        iconTheme: const IconThemeData(color: Colors.white), // Белый цвет для иконок
       ),
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -55,13 +59,19 @@ class _MainScreenState extends State<MainScreen> {
             _currentIndex = index;
           });
         },
-        backgroundColor: Colors.deepPurple, // Фиолетовый фон нижней панели
-        selectedItemColor: Colors.white, // Белый цвет активной вкладки
-        unselectedItemColor: Colors.grey[400], // Серый цвет неактивных вкладок
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.library_books), label: 'Tests'),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.message), label: 'Messenger'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.library_books),
+            label: 'Tests',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.message),
+            label: 'Messenger',
+          ),
         ],
       ),
     );

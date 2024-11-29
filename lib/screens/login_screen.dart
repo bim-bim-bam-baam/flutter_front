@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -36,8 +37,20 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (response.statusCode == 200) {
-        // Успешный вход
-        Navigator.pushReplacementNamed(context, '/home');
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+        if (responseData.containsKey('token')) {
+          final String token = responseData['token'];
+
+          // Сохраняем токен в SharedPreferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('jwt_token', token);
+
+          // Переход на главный экран
+          Navigator.pushReplacementNamed(context, '/home');
+        } else {
+          _showError('Token not found in response');
+        }
       } else {
         _showError('Error: ${response.statusCode} - ${response.body}');
       }
@@ -65,12 +78,12 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepPurple[50], // Фон экрана
+      backgroundColor: Colors.deepPurple[50],
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Card(
-            elevation: 8, // Тень для эффекта объёма
+            elevation: 8,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -79,15 +92,12 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Логотип
                   const CircleAvatar(
                     radius: 50,
                     backgroundColor: Colors.deepPurple,
                     child: Icon(Icons.person, size: 50, color: Colors.white),
                   ),
                   const SizedBox(height: 20),
-
-                  // Заголовок
                   Text(
                     'Welcome Back!',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -96,8 +106,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Поле для имени пользователя
                   TextField(
                     controller: _usernameController,
                     decoration: InputDecoration(
@@ -109,8 +117,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Поле для пароля
                   TextField(
                     controller: _passwordController,
                     decoration: InputDecoration(
@@ -123,10 +129,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     obscureText: true,
                   ),
                   const SizedBox(height: 20),
-
-                  // Кнопка логина
                   ElevatedButton(
-                    onPressed: _login, // Вызов функции входа
+                    onPressed: _login,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 80, vertical: 15),
@@ -140,13 +144,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white, // Белый цвет текста
+                        color: Colors.white,
                       ),
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Текст с кнопкой регистрации
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
