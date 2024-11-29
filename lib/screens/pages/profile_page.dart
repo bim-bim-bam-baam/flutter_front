@@ -1,7 +1,107 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  String? username;
+  File? avatar;
+  String? avatarUrl;
+  final ImagePicker _picker = ImagePicker();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData();
+  }
+
+  // Получение данных пользователя с сервера
+  Future<void> _fetchUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token');
+
+    if (token == null) {
+      print('Token not found');
+      return;
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('http://localhost:8080/api/user/profile'),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          username = data['username'];
+          avatarUrl = data['avatar'];
+        });
+      } else {
+        print('Failed to fetch user data: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+    }
+  }
+
+  // Загрузка аватара
+  Future<void> _pickAvatar() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        avatar = File(pickedFile.path);
+      });
+
+      await _uploadAvatarToBackend(File(pickedFile.path));
+    }
+  }
+
+  // Отправка аватара на сервер
+  Future<void> _uploadAvatarToBackend(File imageFile) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token');
+
+    if (token == null) {
+      print('Token not found');
+      return;
+    }
+
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('http://localhost:8080/api/user/updateAvatar'),
+      );
+      request.headers['Authorization'] = 'Bearer $token';
+      request.files
+          .add(await http.MultipartFile.fromPath('image', imageFile.path));
+
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        print('Avatar uploaded successfully');
+        _fetchUserData(); // Обновляем данные
+      } else {
+        print('Failed to upload avatar: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error uploading avatar: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,23 +129,32 @@ class ProfilePage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Аватар и имя пользователя
             Center(
               child: Column(
                 children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: const Color(0xFF64FFDA), // Мягкий зеленый фон
-                    child: const Icon(
-                      Icons.person,
-                      size: 50,
-                      color: Colors.black, // Черная иконка
+                  GestureDetector(
+                    onTap: _pickAvatar,
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundColor: const Color(0xFF64FFDA), // Мягкий зеленый фон
+                      backgroundImage: avatar != null
+                          ? FileImage(avatar!)
+                          : (avatarUrl != null
+                              ? NetworkImage(avatarUrl!)
+                              : null) as ImageProvider?,
+                      child: (avatar == null && avatarUrl == null)
+                          ? const Icon(
+                              Icons.person,
+                              size: 50,
+                              color: Colors.black, // Черная иконка
+                            )
+                          : null,
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'John Doe',
-                    style: TextStyle(
+                  Text(
+                    username ?? 'Loading...',
+                    style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
