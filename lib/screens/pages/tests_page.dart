@@ -13,10 +13,54 @@ class _TestsPageState extends State<TestsPage> {
   final List<String> _categories = ['Music', 'Movies', 'Books', 'Sports'];
 
   final Map<String, List<String>> _questionsByCategory = {
-    'Music': ['Rock or Rap?'],
-    'Movies': ['Action or Comedy?'],
-    'Books': ['Fiction or Non-Fiction?'],
-    'Sports': ['Football or Basketball?'],
+    'Music': [
+      'Rock or Rap?',
+      'Classical or Pop?',
+      'Jazz or Blues?',
+      'EDM or Hip-hop?',
+      'Indie or Alternative?',
+      'Country or Folk?',
+      'Live Concerts or Studio Recordings?',
+      'Piano or Guitar?',
+      'Solo Artists or Bands?',
+      'Vinyl or Digital?'
+    ],
+    'Movies': [
+      'Action or Comedy?',
+      'Horror or Drama?',
+      'Sci-Fi or Fantasy?',
+      'Romance or Thriller?',
+      'Superhero Movies or Documentaries?',
+      'Classic Movies or Modern Films?',
+      'Animated or Live-Action?',
+      'Subtitles or Dubbed?',
+      'Independent Films or Blockbusters?',
+      'Series or Movies?'
+    ],
+    'Books': [
+      'Fiction or Non-Fiction?',
+      'Mystery or Romance?',
+      'Biography or History?',
+      'Fantasy or Science Fiction?',
+      'Poetry or Prose?',
+      'Novels or Short Stories?',
+      'E-books or Paperbacks?',
+      'Libraries or Bookstores?',
+      'Self-Help or Philosophy?',
+      'Comics or Graphic Novels?'
+    ],
+    'Sports': [
+      'Football or Basketball?',
+      'Tennis or Golf?',
+      'Running or Swimming?',
+      'Team Sports or Solo Sports?',
+      'Gym or Outdoor Activities?',
+      'Winter Sports or Summer Sports?',
+      'Cycling or Hiking?',
+      'Formula 1 or MotoGP?',
+      'Martial Arts or Yoga?',
+      'Cricket or Baseball?'
+    ],
   };
 
   late List<SwipeItem> _swipeItems;
@@ -62,7 +106,7 @@ class _TestsPageState extends State<TestsPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Dropdown for categories
+            // Dropdown для выбора категории
             DropdownButtonFormField<String>(
               value: _selectedCategory,
               decoration: InputDecoration(
@@ -95,12 +139,44 @@ class _TestsPageState extends State<TestsPage> {
             ),
             const SizedBox(height: 20),
 
-            // Swipe cards
+            // Карточки Swipe
             Expanded(
               child: SwipeCards(
                 matchEngine: _matchEngine,
                 itemBuilder: (context, index) {
                   final question = _swipeItems[index].content as String;
+
+                  // Разделение текста на левые и правые варианты
+                  final parts = question.split(' or ');
+                  final leftOption = parts.isNotEmpty ? parts[0] : 'Option 1';
+                  final rightOption = parts.length > 1 ? parts[1] : 'Option 2';
+
+                  // Проверка длины текста для определения наложения
+                  final TextPainter leftTextPainter = TextPainter(
+                    text: TextSpan(
+                      text: leftOption,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    textDirection: TextDirection.ltr,
+                  )..layout();
+                  final TextPainter rightTextPainter = TextPainter(
+                    text: TextSpan(
+                      text: rightOption,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    textDirection: TextDirection.ltr,
+                  )..layout();
+
+                  final double textOverlapThreshold = screenWidth * 0.4;
+                  final bool textOverlap =
+                      leftTextPainter.width + rightTextPainter.width >
+                      textOverlapThreshold;
 
                   return Container(
                     width: screenWidth * 0.9,
@@ -123,7 +199,7 @@ class _TestsPageState extends State<TestsPage> {
                     ),
                     child: Stack(
                       children: [
-                        // Вопрос в верхней части карточки, динамический размер
+                        // Вопрос сверху карточки
                         Positioned(
                           top: screenHeight * 0.05,
                           left: 20,
@@ -132,7 +208,7 @@ class _TestsPageState extends State<TestsPage> {
                             question,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: question.length > 20 ? 28 : 36, // Динамический размер
+                              fontSize: question.length > 20 ? 28 : 36,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                               shadows: const [
@@ -145,10 +221,12 @@ class _TestsPageState extends State<TestsPage> {
                           ),
                         ),
 
-                        // Текст "Rock" с зеленой стрелкой в центре карточки
+                        // Левый вариант выбора
                         Positioned(
                           left: 20,
-                          top: screenHeight * 0.35,
+                          top: textOverlap
+                              ? screenHeight * 0.3
+                              : screenHeight * 0.35,
                           child: Row(
                             children: [
                               const Icon(
@@ -158,14 +236,14 @@ class _TestsPageState extends State<TestsPage> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'Rock',
-                                style: TextStyle(
+                                leftOption,
+                                style: const TextStyle(
                                   fontSize: 28,
                                   fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF64FFDA),
+                                  color: Color(0xFF64FFDA),
                                   shadows: [
                                     Shadow(
-                                      color: const Color(0xFF64FFDA),
+                                      color: Color(0xFF64FFDA),
                                       blurRadius: 10,
                                     ),
                                   ],
@@ -175,21 +253,23 @@ class _TestsPageState extends State<TestsPage> {
                           ),
                         ),
 
-                        // Текст "Rap" с фиолетовой стрелкой в центре карточки
+                        // Правый вариант выбора
                         Positioned(
                           right: 20,
-                          top: screenHeight * 0.35,
+                          top: textOverlap
+                              ? screenHeight * 0.4
+                              : screenHeight * 0.35,
                           child: Row(
                             children: [
                               Text(
-                                'Rap',
-                                style: TextStyle(
+                                rightOption,
+                                style: const TextStyle(
                                   fontSize: 28,
                                   fontWeight: FontWeight.bold,
-                                  color: const Color(0xFFBB86FC),
+                                  color: Color(0xFFBB86FC),
                                   shadows: [
                                     Shadow(
-                                      color: const Color(0xFFBB86FC),
+                                      color: Color(0xFFBB86FC),
                                       blurRadius: 10,
                                     ),
                                   ],
