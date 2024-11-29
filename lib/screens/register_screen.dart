@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert'; // Для обработки JSON
+import 'dart:convert';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -22,8 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    final Uri url =
-        Uri.parse('http://10.124.22.176:8080/api/user/register'); // URL сервера
+    final Uri url = Uri.parse('http://10.124.22.176:8080/api/user/register');
     try {
       final response = await http.post(
         url,
@@ -35,7 +34,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       if (response.statusCode == 200) {
-        Navigator.pushReplacementNamed(context, '/login'); // Переход на логин
+        Navigator.pushReplacementNamed(context, '/login');
       } else if (response.statusCode == 400) {
         _showError('User with such username is already exist');
       } else {
@@ -50,12 +49,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text(
+          'Error',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white70),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
+            child: const Text(
+              'OK',
+              style: TextStyle(color: Color(0xFFBB86FC)),
+            ),
           ),
         ],
       ),
@@ -65,12 +74,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepPurple[50], // Фон экрана
+      backgroundColor: const Color(0xFF121212),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Card(
-            elevation: 8, // Тень для эффекта объёма
+            color: const Color(0xFF1E1E1E),
+            elevation: 15,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -81,46 +91,105 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 children: [
                   const CircleAvatar(
                     radius: 50,
-                    backgroundColor: Colors.deepPurple,
-                    child:
-                        Icon(Icons.person_add, size: 50, color: Colors.white),
+                    backgroundColor: Color(0xFFBB86FC),
+                    child: Icon(
+                      Icons.person_add,
+                      size: 50,
+                      color: Colors.black,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   Text(
                     'Create Account',
-                    style: headlineStyle(context),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          color: const Color(0xFFBB86FC),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 20),
                   TextField(
                     controller: _usernameController,
-                    decoration: inputDecoration('Username', Icons.person),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Username',
+                      labelStyle: const TextStyle(color: Colors.white),
+                      prefixIcon: const Icon(Icons.person, color: Color(0xFFBB86FC)),
+                      filled: true,
+                      fillColor: const Color(0xFF2E2E2E),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Color(0xFFBB86FC)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 20),
                   TextField(
                     controller: _passwordController,
-                    decoration: inputDecoration('Password', Icons.lock),
                     obscureText: true,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      labelStyle: const TextStyle(color: Colors.white),
+                      prefixIcon: const Icon(Icons.lock, color: Color(0xFFBB86FC)),
+                      filled: true,
+                      fillColor: const Color(0xFF2E2E2E),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Color(0xFFBB86FC)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: _register, // Вызываем функцию регистрации
-                    style: buttonStyle(),
-                    child: Text(
+                    onPressed: _register,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 80,
+                        vertical: 15,
+                      ),
+                      backgroundColor: const Color(0xFFBB86FC),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
                       'Register',
-                      style: buttonTextStyle(),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Already have an account?'),
+                      const Text(
+                        'Already have an account?',
+                        style: TextStyle(color: Colors.white),
+                      ),
                       TextButton(
                         onPressed: () {
-
-Navigator.pushReplacementNamed(context, '/login');
+                          Navigator.pushReplacementNamed(context, '/login');
                         },
-                        child: const Text('Login'),
+                        child: const Text(
+                          'Login',
+                          style: TextStyle(color: Color(0xFFBB86FC)),
+                        ),
                       ),
                     ],
                   ),
@@ -132,43 +201,4 @@ Navigator.pushReplacementNamed(context, '/login');
       ),
     );
   }
-}
-
-TextStyle headlineStyle(BuildContext context) {
-  return Theme.of(context).textTheme.headlineSmall?.copyWith(
-            color: Colors.deepPurple,
-            fontWeight: FontWeight.bold,
-          ) ??
-      const TextStyle(fontSize: 24, fontWeight: FontWeight.bold);
-}
-
-// Стиль кнопки
-ButtonStyle buttonStyle() {
-  return ElevatedButton.styleFrom(
-    padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 15),
-    backgroundColor: Colors.deepPurple,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-  );
-}
-
-// Стиль текста кнопки
-TextStyle buttonTextStyle() {
-  return const TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.bold,
-    color: Colors.white,
-  );
-}
-
-// Общий стиль для полей ввода
-InputDecoration inputDecoration(String label, IconData icon) {
-  return InputDecoration(
-    labelText: label,
-    prefixIcon: Icon(icon),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-  );
 }

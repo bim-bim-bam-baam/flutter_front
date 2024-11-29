@@ -63,12 +63,22 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text(
+          'Error',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white70),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
+            child: const Text(
+              'OK',
+              style: TextStyle(color: Color(0xFFBB86FC)),
+            ),
           ),
         ],
       ),
@@ -78,12 +88,13 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepPurple[50],
+      backgroundColor: const Color(0xFF121212),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Card(
-            elevation: 8,
+            color: const Color(0xFF1E1E1E),
+            elevation: 15,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -94,24 +105,43 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const CircleAvatar(
                     radius: 50,
-                    backgroundColor: Colors.deepPurple,
-                    child: Icon(Icons.person, size: 50, color: Colors.white),
+                    backgroundColor: Color(0xFFBB86FC),
+                    child: Icon(
+                      Icons.person,
+                      size: 50,
+                      color: Colors.black,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   Text(
                     'Welcome Back!',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: Colors.deepPurple,
-                          fontWeight: FontWeight.bold,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          color: const Color(0xFFBB86FC),
+                          blurRadius: 10,
                         ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 20),
                   TextField(
                     controller: _usernameController,
+                    style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       labelText: 'Username',
-                      prefixIcon: const Icon(Icons.person),
+                      labelStyle: const TextStyle(color: Colors.white),
+                      prefixIcon: const Icon(Icons.person, color: Color(0xFFBB86FC)),
+                      filled: true,
+                      fillColor: const Color(0xFF2E2E2E),
                       border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Color(0xFFBB86FC)),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
@@ -119,22 +149,32 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 20),
                   TextField(
                     controller: _passwordController,
+                    obscureText: true,
+                    style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       labelText: 'Password',
-                      prefixIcon: const Icon(Icons.lock),
+                      labelStyle: const TextStyle(color: Colors.white),
+                      prefixIcon: const Icon(Icons.lock, color: Color(0xFFBB86FC)),
+                      filled: true,
+                      fillColor: const Color(0xFF2E2E2E),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Color(0xFFBB86FC)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    obscureText: true,
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _login,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 80, vertical: 15),
-                      backgroundColor: Colors.deepPurple,
+                        horizontal: 80,
+                        vertical: 15,
+                      ),
+                      backgroundColor: const Color(0xFFBB86FC),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -144,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Colors.black,
                       ),
                     ),
                   ),
@@ -152,12 +192,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Don’t have an account?'),
+                      const Text(
+                        'Don’t have an account?',
+                        style: TextStyle(color: Colors.white),
+                      ),
                       TextButton(
                         onPressed: () {
                           Navigator.pushNamed(context, '/register');
                         },
-                        child: const Text('Register Now'),
+                        child: const Text(
+                          'Register Now',
+                          style: TextStyle(color: Color(0xFFBB86FC)),
+                        ),
                       ),
                     ],
                   ),

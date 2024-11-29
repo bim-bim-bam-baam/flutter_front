@@ -12,41 +12,59 @@ class MessengerPage extends StatelessWidget {
       {'name': 'Charlie', 'lastMessage': 'See you at the event!'},
     ];
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: chats.length,
-      itemBuilder: (context, index) {
-        final chat = chats[index];
-        return Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.deepPurple,
-              child: Text(
-                chat['name']![0],
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-            title: Text(
-              chat['name']!,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text(chat['lastMessage']!),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChatPage(chatName: chat['name']!),
+    return Scaffold(
+      backgroundColor: const Color(0xFF121212), // Темный фон
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: chats.length,
+        itemBuilder: (context, index) {
+          final chat = chats[index];
+          return Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E1E1E), // Темно-серый фон карточки
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF64FFDA).withOpacity(0.2), // Зеленая тень
+                  blurRadius: 8,
+                  offset: const Offset(2, 4),
                 ),
-              );
-            },
-          ),
-        );
-      },
+              ],
+            ),
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: const Color(0xFF64FFDA), // Мягкий зеленый
+                child: Text(
+                  chat['name']![0], // Первая буква имени
+                  style: const TextStyle(color: Colors.black), // Черный текст
+                ),
+              ),
+              title: Text(
+                chat['name']!,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white, // Белый текст
+                ),
+              ),
+              subtitle: Text(
+                chat['lastMessage']!,
+                style: const TextStyle(
+                  color: Colors.white70, // Мягкий белый текст
+                ),
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatPage(chatName: chat['name']!),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }

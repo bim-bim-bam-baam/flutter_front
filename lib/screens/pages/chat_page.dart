@@ -30,14 +30,19 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepPurple[50],
+      backgroundColor: const Color(0xFF121212), // Темный фон
       appBar: AppBar(
         title: Text(
           widget.chatName,
-          style: const TextStyle(color: Colors.white), // Белый текст заголовка
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        backgroundColor: Colors.deepPurple,
-        iconTheme: const IconThemeData(color: Colors.white), // Белая стрелка "Назад"
+        backgroundColor: const Color(0xFF1E1E1E), // Темный градиент
+        iconTheme: const IconThemeData(color: Color(0xFF64FFDA)), // Иконка "Назад" с мягким зеленым
+        elevation: 0,
       ),
       body: Column(
         children: [
@@ -51,37 +56,47 @@ class _ChatPageState extends State<ChatPage> {
                 final isMe = message['sender'] == 'You';
                 return Align(
                   alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Card(
-                    color: isMe ? Colors.deepPurple : Colors.white,
-                    shape: RoundedRectangleBorder(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isMe
+                          ? const Color(0xFF1F2937) // Темно-зеленый серый для себя
+                          : const Color(0xFF2D2D34), // Темно-фиолетовый для других
                       borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: isMe
+                              ? const Color(0xFF64FFDA).withOpacity(0.1) // Легкий зеленый для себя
+                              : const Color(0xFFBB86FC).withOpacity(0.1), // Легкий фиолетовый для других
+                          blurRadius: 10,
+                          offset: const Offset(2, 4),
+                        ),
+                      ],
                     ),
                     margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: isMe
-                            ? CrossAxisAlignment.end
-                            : CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            message['sender']!,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: isMe
-                                  ? Colors.white
-                                  : Colors.deepPurple.shade700,
-                            ),
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: isMe
+                          ? CrossAxisAlignment.end
+                          : CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          message['sender']!,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: isMe
+                                ? const Color(0xFF64FFDA) // Мягкий зеленый
+                                : const Color(0xFFBB86FC), // Мягкий фиолетовый
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            message['text']!,
-                            style: TextStyle(
-                              color: isMe ? Colors.white : Colors.black,
-                            ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          message['text']!,
+                          style: const TextStyle(
+                            color: Colors.white70, // Нежный белый
+                            fontSize: 16,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 );
@@ -91,35 +106,49 @@ class _ChatPageState extends State<ChatPage> {
 
           // Поле ввода сообщения
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: const BoxDecoration(
+              color: Color(0xFF1E1E1E), // Темный фон
+              border: Border(
+                top: BorderSide(color: Color(0xFF64FFDA), width: 1.5),
+              ),
+            ),
             child: Row(
               children: [
                 // Поле ввода
                 Expanded(
                   child: TextField(
                     controller: _controller,
+                    style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: 'Type a message',
+                      hintText: 'Type a message...',
+                      hintStyle: const TextStyle(color: Colors.white38),
+                      filled: true,
+                      fillColor: const Color(0xFF2E2E2E), // Темно-серый фон
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
 
                 // Кнопка отправки
                 ElevatedButton(
                   onPressed: _sendMessage,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
+                    backgroundColor: const Color(0xFF64FFDA), // Мягкий зеленый
                     padding: const EdgeInsets.all(16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Icon(Icons.send, color: Colors.white),
+                  child: const Icon(Icons.send, color: Colors.black),
                 ),
               ],
             ),

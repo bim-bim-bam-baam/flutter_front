@@ -57,7 +57,7 @@ class _TestsPageState extends State<TestsPage> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFF121212),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -72,11 +72,11 @@ class _TestsPageState extends State<TestsPage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.white),
+                  borderSide: const BorderSide(color: Color(0xFF64FFDA)),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              dropdownColor: Colors.grey[900],
+              dropdownColor: const Color(0xFF1E1E1E),
               style: const TextStyle(color: Colors.white),
               items: _categories
                   .map((category) => DropdownMenuItem(
@@ -110,67 +110,63 @@ class _TestsPageState extends State<TestsPage> {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.green.withOpacity(0.4),
-                          blurRadius: 15,
+                          color: Colors.green.withOpacity(0.5),
+                          blurRadius: 20,
                           offset: const Offset(-5, 5),
                         ),
                         BoxShadow(
-                          color: Colors.purple.withOpacity(0.4),
-                          blurRadius: 15,
+                          color: Colors.purple.withOpacity(0.5),
+                          blurRadius: 20,
                           offset: const Offset(5, 5),
                         ),
                       ],
                     ),
                     child: Stack(
                       children: [
-                        // Вопрос в центре сверху (белая надпись)
+                        // Вопрос в верхней части карточки, динамический размер
                         Positioned(
-                          top: 40,
-                          left: 0,
-                          right: 0,
-                          child: Center(
-                            child: Text(
-                              question,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.white,
-                                    blurRadius: 10,
-                                    offset: Offset(2, 2),
-                                  ),
-                                ],
-                              ),
+                          top: screenHeight * 0.05,
+                          left: 20,
+                          right: 20,
+                          child: Text(
+                            question,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: question.length > 20 ? 28 : 36, // Динамический размер
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              shadows: const [
+                                Shadow(
+                                  color: Colors.white,
+                                  blurRadius: 10,
+                                ),
+                              ],
                             ),
                           ),
                         ),
 
-                        // Текст "Rock" с зеленой стрелкой (слева, под вопросом)
+                        // Текст "Rock" с зеленой стрелкой в центре карточки
                         Positioned(
                           left: 20,
-                          top: screenHeight * 0.4,
+                          top: screenHeight * 0.35,
                           child: Row(
                             children: [
                               const Icon(
                                 Icons.arrow_back,
-                                color: Colors.green,
-                                size: 30,
+                                color: Color(0xFF64FFDA),
+                                size: 28,
                               ),
                               const SizedBox(width: 8),
-                              const Text(
+                              Text(
                                 'Rock',
                                 style: TextStyle(
                                   fontSize: 28,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.green,
+                                  color: const Color(0xFF64FFDA),
                                   shadows: [
                                     Shadow(
-                                      color: Colors.green,
+                                      color: const Color(0xFF64FFDA),
                                       blurRadius: 10,
-                                      offset: Offset(2, 2),
                                     ),
                                   ],
                                 ),
@@ -179,23 +175,22 @@ class _TestsPageState extends State<TestsPage> {
                           ),
                         ),
 
-                        // Текст "Rap" с фиолетовой стрелкой (справа, под вопросом)
+                        // Текст "Rap" с фиолетовой стрелкой в центре карточки
                         Positioned(
                           right: 20,
-                          top: screenHeight * 0.4,
+                          top: screenHeight * 0.35,
                           child: Row(
                             children: [
-                              const Text(
+                              Text(
                                 'Rap',
                                 style: TextStyle(
                                   fontSize: 28,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.purple,
+                                  color: const Color(0xFFBB86FC),
                                   shadows: [
                                     Shadow(
-                                      color: Colors.purple,
+                                      color: const Color(0xFFBB86FC),
                                       blurRadius: 10,
-                                      offset: Offset(2, 2),
                                     ),
                                   ],
                                 ),
@@ -203,14 +198,14 @@ class _TestsPageState extends State<TestsPage> {
                               const SizedBox(width: 8),
                               const Icon(
                                 Icons.arrow_forward,
-                                color: Colors.purple,
-                                size: 30,
+                                color: Color(0xFFBB86FC),
+                                size: 28,
                               ),
                             ],
                           ),
                         ),
 
-                        // Кнопка "Не знаю" снизу
+                        // Кнопка "Не знаю"
                         Positioned(
                           bottom: 20,
                           left: 0,
@@ -223,23 +218,22 @@ class _TestsPageState extends State<TestsPage> {
                                   horizontal: 20,
                                   vertical: 14,
                                 ),
-                                backgroundColor: Colors.black,
+                                backgroundColor: const Color(0xFF1E1E1E),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                shadowColor: Colors.white,
-                                elevation: 15,
+                                side: const BorderSide(color: Colors.white),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: const [
-                                  Icon(Icons.help_outline, color: Colors.grey),
+                                  Icon(Icons.help_outline, color: Colors.white),
                                   SizedBox(width: 8),
                                   Text(
                                     'Не знаю',
                                     style: TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 18,
+                                      color: Colors.white,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),

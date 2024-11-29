@@ -39,7 +39,7 @@ class _PeoplePageState extends State<PeoplePage> {
     filteredPeople.sort((a, b) => b['similarity'].compareTo(a['similarity']));
 
     return Scaffold(
-      backgroundColor: Colors.deepPurple[50],
+      backgroundColor: const Color(0xFF121212), // Темный фон страницы
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -49,14 +49,24 @@ class _PeoplePageState extends State<PeoplePage> {
               value: _selectedAgeGroup,
               decoration: InputDecoration(
                 labelText: 'Filter by Age',
+                labelStyle: const TextStyle(color: Colors.white),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Color(0xFFBB86FC)), // Фиолетовый акцент
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
+              dropdownColor: const Color(0xFF1E1E1E), // Темный фон списка
+              style: const TextStyle(color: Colors.white),
               items: _ageGroups
                   .map((group) => DropdownMenuItem(
                         value: group,
-                        child: Text(group),
+                        child: Text(
+                          group,
+                          style: const TextStyle(color: Colors.white),
+                        ),
                       ))
                   .toList(),
               onChanged: (value) {
@@ -75,27 +85,51 @@ class _PeoplePageState extends State<PeoplePage> {
                 itemCount: filteredPeople.length,
                 itemBuilder: (context, index) {
                   final person = filteredPeople[index];
-                  return Card(
-                    elevation: 8,
-                    shape: RoundedRectangleBorder(
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E1E1E), // Темный фон карточки
                       borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFBB86FC).withOpacity(0.2), // Фиолетовая тень
+                          blurRadius: 10,
+                          offset: const Offset(2, 4),
+                        ),
+                      ],
                     ),
                     margin: const EdgeInsets.symmetric(vertical: 8),
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: Colors.deepPurple,
+                        backgroundColor: const Color(0xFFBB86FC), // Фиолетовый фон аватара
                         child: Text(
                           person['name'][0], // Первая буква имени
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      title: Text(person['name']),
-                      subtitle: Text(
-                          'Similarity: ${person['similarity']}%\nAge: ${person['age']}'),
-                      trailing: Icon(
-                        Icons.check_circle,
-                        color: Colors.deepPurple,
+                      title: Text(
+                        person['name'],
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
+                      subtitle: Text(
+                        'Similarity: ${person['similarity']}%\nAge: ${person['age']}',
+                        style: const TextStyle(
+                          color: Colors.white70, // Мягкий белый
+                        ),
+                      ),
+                      trailing: const Icon(
+                        Icons.check_circle,
+                        color: Color(0xFFBB86FC), // Фиолетовый акцент
+                      ),
+                      onTap: () {
+                        // Логика при нажатии на карточку
+                      },
                     ),
                   );
                 },

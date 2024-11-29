@@ -16,11 +16,11 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _pages = [
     const TestsPage(), // Tests
-    const PeoplePage(), // Home
+    const PeoplePage(), // People
     const MessengerPage(), // Messenger
   ];
 
-  final List<String> _titles = ['Tests', 'Home', 'Messenger'];
+  final List<String> _titles = ['Tests', 'People', 'Messenger'];
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +66,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.people),
-            label: 'Home',
+            label: 'People',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message),

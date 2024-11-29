@@ -27,17 +27,17 @@ class MyApp extends StatelessWidget {
             fontWeight: FontWeight.bold,
             color: Colors.white, // Белый текст AppBar
           ),
-          iconTheme: IconThemeData(color: Colors.green), // Иконки AppBar
+          iconTheme: IconThemeData(color: Color.fromARGB(255, 3, 173, 162)), // Бирюзовые иконки AppBar
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           backgroundColor: Colors.black,
-          selectedItemColor: Colors.green, // Зеленый активный элемент
+          selectedItemColor: Color.fromARGB(255, 3, 173, 162), // Бирюзовый активный элемент
           unselectedItemColor: Colors.purple, // Фиолетовый неактивный элемент
         ),
         textTheme: const TextTheme(
           bodyMedium: TextStyle(color: Colors.white), // Белый текст по умолчанию
         ),
-        iconTheme: const IconThemeData(color: Colors.green), // Зеленые иконки по умолчанию
+        iconTheme: const IconThemeData(color: Color.fromARGB(255, 3, 173, 162)), // Бирюзовые иконки по умолчанию
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.black,
@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: '/home',
+      initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
