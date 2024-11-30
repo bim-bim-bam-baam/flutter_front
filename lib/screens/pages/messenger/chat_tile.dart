@@ -143,15 +143,23 @@ Widget _buildActiveChat(BuildContext context) {
 
 
 Widget _buildPendingRequestChat(BuildContext context) {
-  // Добавим локальное состояние
-  bool actionCompleted = false; // Состояние: завершено ли действие
-  Color backgroundColor = Colors.orange[700]!; // Текущий цвет фона
+  // Добавляем локальное состояние для изменения цвета карточки
+  bool actionCompleted = false; // Завершено ли действие
+  Color backgroundColor = const Color(0xFF2C2C2C); // Цвет по умолчанию для входящих запросов
 
   return StatefulBuilder(
     builder: (context, setState) => Container(
       decoration: BoxDecoration(
-        color: actionCompleted ? backgroundColor : Colors.orange[700], // Меняем цвет в зависимости от действия
+        color: actionCompleted ? backgroundColor : const Color(0xFF2C2C2C),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF64FFDA), width: 2), // Бордер в стиле темы
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF64FFDA).withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: ListTile(
@@ -173,25 +181,22 @@ Widget _buildPendingRequestChat(BuildContext context) {
           ),
         ),
         trailing: actionCompleted
-            ? null // Если действие выполнено, кнопки не отображаются
+            ? null // Убираем кнопки, если действие завершено
             : Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Зеленая кнопка для принятия
                   IconButton(
                     icon: const Icon(Icons.check, color: Colors.green),
                     onPressed: () async {
                       try {
                         final response = await http.post(
                           Uri.parse('$baseUrl/chat/${chat['id']}/accept'),
-                          headers: {
-                            'Authorization': 'Bearer $token',
-                          },
+                          headers: {'Authorization': 'Bearer $token'},
                         );
                         if (response.statusCode == 200) {
                           setState(() {
-                            actionCompleted = true; // Действие завершено
-                            backgroundColor = Colors.green; // Цвет фона — зелёный
+                            actionCompleted = true;
+                            backgroundColor = const Color(0xFF1D4E3F); // Зеленоватый фон
                           });
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Request accepted')),
@@ -208,21 +213,18 @@ Widget _buildPendingRequestChat(BuildContext context) {
                       }
                     },
                   ),
-                  // Красная кнопка для отклонения
                   IconButton(
                     icon: const Icon(Icons.close, color: Colors.red),
                     onPressed: () async {
                       try {
                         final response = await http.post(
                           Uri.parse('$baseUrl/chat/${chat['id']}/decline'),
-                          headers: {
-                            'Authorization': 'Bearer $token',
-                          },
+                          headers: {'Authorization': 'Bearer $token'},
                         );
                         if (response.statusCode == 200) {
                           setState(() {
-                            actionCompleted = true; // Действие завершено
-                            backgroundColor = Colors.red; // Цвет фона — красный
+                            actionCompleted = true;
+                            backgroundColor = const Color(0xFF5C1D1D); // Красноватый фон
                           });
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Request declined')),
@@ -250,36 +252,43 @@ Widget _buildPendingRequestChat(BuildContext context) {
 }
 
 
-
   Widget _buildSentRequestChat(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.blue[700],
-        borderRadius: BorderRadius.circular(16),
+  return Container(
+    decoration: BoxDecoration(
+      color: const Color(0xFF003C8F), // Синий оттенок для Outgoing запросов
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: const Color(0xFFBB86FC), width: 2), // Бордер в фиолетовом стиле
+      boxShadow: [
+        BoxShadow(
+          color: const Color(0xFFBB86FC).withOpacity(0.3),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    margin: const EdgeInsets.symmetric(vertical: 8),
+    child: ListTile(
+      leading: CircleAvatar(
+        backgroundImage: NetworkImage(chat['avatar']),
+        backgroundColor: const Color(0xFFBB86FC),
       ),
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundImage: NetworkImage(chat['avatar']),
-          backgroundColor: const Color(0xFF64FFDA),
+      title: Text(
+        chat['username'],
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
         ),
-        title: Text(
-          chat['username'],
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        subtitle: const Text(
-          'Outgoing request',
-          style: TextStyle(
-            color: Colors.white70,
-          ),
-        ),
-        onTap: () {
-          // Переход в чат (если нужно)
-        },
       ),
-    );
-  }
+      subtitle: const Text(
+        'Outgoing request',
+        style: TextStyle(
+          color: Colors.white70,
+        ),
+      ),
+      onTap: () {
+        // Переход в чат (если нужно)
+      },
+    ),
+  );
+}
 }
