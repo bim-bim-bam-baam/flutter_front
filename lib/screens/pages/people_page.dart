@@ -253,7 +253,6 @@ void _showSuccessDialog(String message) {
                     child: ListTile(
                       leading: CircleAvatar(
                         backgroundColor: const Color(0xFFBB86FC),
-                        backgroundImage: NetworkImage(person['avatar']),
                         child: Text(
                           person['username'],
                           style: const TextStyle(
