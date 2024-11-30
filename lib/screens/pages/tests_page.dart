@@ -11,18 +11,18 @@ String decodeUtf8(String input) {
   return utf8.decode(Uint8List.fromList(input.codeUnits));
 }
 
-class TestsPage extends StatefulWidget {
-  const TestsPage({super.key});
-
-  @override
-  State<TestsPage> createState() => _TestsPageState();
-}
-
 class QuestionItem {
   final String id;
   final String content;
 
   QuestionItem({required this.id, required this.content});
+}
+
+class TestsPage extends StatefulWidget {
+  const TestsPage({super.key});
+
+  @override
+  State<TestsPage> createState() => _TestsPageState();
 }
 
 class _TestsPageState extends State<TestsPage> {
@@ -37,8 +37,7 @@ class _TestsPageState extends State<TestsPage> {
   void initState() {
     super.initState();
     _loadCategories();
-    _selectedCategory =
-        _categories.isNotEmpty ? _categories[0] : ''; // Set a default value
+    _selectedCategory = _categories.isNotEmpty ? _categories[0] : '';
   }
 
   // Получаем все категории с бекенда
@@ -100,10 +99,7 @@ class _TestsPageState extends State<TestsPage> {
         if (data.isNotEmpty) {
           setState(() {
             _questions = data
-                .map((q) => {
-                      'id': q['id'], // ID вопроса
-                      'content': q['content']
-                    })
+                .map((q) => {'id': q['id'], 'content': q['content']})
                 .toList();
             _initializeSwipeItems();
           });
@@ -119,14 +115,13 @@ class _TestsPageState extends State<TestsPage> {
   void _initializeSwipeItems() {
     _swipeItems = _questions.map((question) {
       QuestionItem questionItem = QuestionItem(
-        id: question['id'].toString(), // ID вопроса
-        content: question['content'], // Текст вопроса
+        id: question['id'].toString(),
+        content: question['content'],
       );
 
       return SwipeItem(
-        content: questionItem, // Храним сам объект вместо строки
-        likeAction: () =>
-            _onAnswer(questionItem.id, 1), // Используем ID объекта
+        content: questionItem,
+        likeAction: () => _onAnswer(questionItem.id, 1),
         nopeAction: () => _onAnswer(questionItem.id, -1),
         superlikeAction: () => _onAnswer(questionItem.id, 0),
       );
@@ -143,8 +138,6 @@ class _TestsPageState extends State<TestsPage> {
       print('Token not found');
       return;
     }
-
-    // print(questionId);
 
     try {
       final response = await http.get(
@@ -182,13 +175,15 @@ class _TestsPageState extends State<TestsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Dropdown для выбора категории
             DropdownButtonFormField<String>(
               value: _selectedCategory.isEmpty ? null : _selectedCategory,
               decoration: InputDecoration(
@@ -215,27 +210,30 @@ class _TestsPageState extends State<TestsPage> {
                   setState(() {
                     _selectedCategory = value;
                     _questions.clear();
-                    _loadAllQuestions(
-                        value); // Получаем все вопросы для выбранной категории
+                    _loadAllQuestions(value);
                   });
                 }
               },
             ),
             const SizedBox(height: 20),
-
-            // Карточки Swipe
             Expanded(
               child: _swipeItems.isEmpty
-                  ? Center(child: CircularProgressIndicator())
+                  ? const Center(child: CircularProgressIndicator())
                   : SwipeCards(
                       matchEngine: _matchEngine,
                       itemBuilder: (context, index) {
                         final question =
                             _swipeItems[index].content.content as String;
-                        final questionId =
-                            _swipeItems[index].content.id as String;
+
+                        final parts = question.split(' or ');
+                        final leftOption =
+                            parts.isNotEmpty ? parts[0] : 'Option 1';
+                        final rightOption =
+                            parts.length > 1 ? parts[1] : 'Option 2';
 
                         return Container(
+                          width: screenWidth * 0.9,
+                          height: screenHeight * 0.7,
                           decoration: BoxDecoration(
                             color: Colors.black,
                             borderRadius: BorderRadius.circular(20),
@@ -245,26 +243,91 @@ class _TestsPageState extends State<TestsPage> {
                                 blurRadius: 20,
                                 offset: const Offset(-5, 5),
                               ),
+                              BoxShadow(
+                                color: Colors.purple.withOpacity(0.5),
+                                blurRadius: 20,
+                                offset: const Offset(5, 5),
+                              ),
                             ],
                           ),
                           child: Stack(
                             children: [
-                              // Вопрос сверху карточки
                               Positioned(
-                                top: 20,
+                                top: screenHeight * 0.05,
                                 left: 20,
                                 right: 20,
                                 child: Text(
                                   question,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    fontSize: 28,
+                                    fontSize: question.length > 20 ? 28 : 36,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
+                                    shadows: const [
+                                      Shadow(
+                                        color: Colors.white,
+                                        blurRadius: 10,
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
-                              // Кнопка "Не знаю"
+                              Positioned(
+                                left: 20,
+                                top: screenHeight * 0.35,
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.arrow_back,
+                                      color: Color(0xFF64FFDA),
+                                      size: 28,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      leftOption,
+                                      style: const TextStyle(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF64FFDA),
+                                        shadows: [
+                                          Shadow(
+                                            color: Color(0xFF64FFDA),
+                                            blurRadius: 10,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Positioned(
+                                right: 20,
+                                top: screenHeight * 0.35,
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      rightOption,
+                                      style: const TextStyle(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFFBB86FC),
+                                        shadows: [
+                                          Shadow(
+                                            color: Color(0xFFBB86FC),
+                                            blurRadius: 10,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Icon(
+                                      Icons.arrow_forward,
+                                      color: Color(0xFFBB86FC),
+                                      size: 28,
+                                    ),
+                                  ],
+                                ),
+                              ),
                               Positioned(
                                 bottom: 20,
                                 left: 0,
@@ -272,14 +335,35 @@ class _TestsPageState extends State<TestsPage> {
                                 child: Center(
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      // _onAnswer(questionId, 0);
                                       _swipeItems[index].superLike();
                                     },
-                                    child: Text('Не знаю'),
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.grey,
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 40, vertical: 10),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 14,
+                                      ),
+                                      backgroundColor: const Color(0xFF1E1E1E),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      side:
+                                          const BorderSide(color: Colors.white),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: const [
+                                        Icon(Icons.help_outline,
+                                            color: Colors.white),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'Не знаю',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
