@@ -1,9 +1,17 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 
 import '../../constants/constants.dart';
+
+import 'dart:convert';
+import 'dart:typed_data';
+
+String decodeUtf8(String input) {
+  return utf8.decode(Uint8List.fromList(input.codeUnits));
+}
 
 class TestsPage extends StatefulWidget {
   const TestsPage({super.key});
@@ -12,17 +20,21 @@ class TestsPage extends StatefulWidget {
   State<TestsPage> createState() => _TestsPageState();
 }
 
+// ...
 class _TestsPageState extends State<TestsPage> {
   String _selectedCategory = '';
   List<String> _categories = [];
   List<String> _questions = [];
-  late List<SwipeItem> _swipeItems;
+  Map<String, String> _categoryMap = {}; // Map для категории и её ID
+  late List<SwipeItem> _swipeItems = [];
   late MatchEngine _matchEngine;
 
   @override
   void initState() {
     super.initState();
     _loadCategories();
+    _selectedCategory =
+        _categories.isNotEmpty ? _categories[0] : ''; // Set a default value
   }
 
   // Получаем все категории с бекенда
@@ -32,8 +44,21 @@ class _TestsPageState extends State<TestsPage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as List;
         setState(() {
-          _categories =
-              data.map((category) => category['name'] as String).toList();
+          _categories = data.map((category) {
+            var name = category['name'];
+            return name is String
+                ? name
+                : name.toString(); // Ensuring it's a string
+          }).toList();
+
+          // Создание map для категорий и их ID
+          _categoryMap = {
+            for (var item in data)
+              item['name'] is String ? item['name'] : item['name'].toString():
+                  (item['id'] is String
+                      ? item['id']
+                      : item['id'].toString()) // Ensure the ID is a string
+          };
         });
       } else {
         throw Exception('Failed to load categories');
@@ -43,24 +68,54 @@ class _TestsPageState extends State<TestsPage> {
     }
   }
 
-  // Получаем следующий вопрос для выбранной категории
-  Future<void> _loadNextQuestion(String categoryId) async {
+  // Загружаем все вопросы для выбранной категории
+  Future<void> _loadAllQuestions(String categoryName) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token');
+
+    print("categoryName: ");
+    print(categoryName);
+    final categoryId = _categoryMap[categoryName];
+    final intId = int.tryParse(categoryId ?? '0');
+
+    if (token == null) {
+      print('Token not found');
+      return;
+    }
+
+    print(categoryId);
+    print(intId);
+
     try {
-      final response = await http
-          .get(Uri.parse('$baseUrl/question/getNextQuestion?id=$categoryId'));
+      final response = await http.get(
+        Uri.parse(
+            '$baseUrl/question/allByCategory?categoryId=$intId'), // Используем query-параметр
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print(response.body);
+      print(response.statusCode);
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data != null && data['question'] != null) {
+        final decodedBody = decodeUtf8(response.body);
+        final data = json.decode(decodedBody) as List;
+
+        if (data.isNotEmpty) {
           setState(() {
-            _questions.add(data['question'] as String);
+            _questions = data
+                .map((q) => q['content'] != null
+                    ? q['content'] as String
+                    : 'No content available')
+                .toList();
             _initializeSwipeItems();
           });
+        } else {
+          print("No questions found for this category");
         }
-      } else {
-        throw Exception('Failed to load question');
       }
     } catch (e) {
-      print('Error loading question: $e');
+      print('Error loading questions: $e');
     }
   }
 
@@ -87,7 +142,7 @@ class _TestsPageState extends State<TestsPage> {
           children: [
             // Dropdown для выбора категории
             DropdownButtonFormField<String>(
-              value: _selectedCategory,
+              value: _selectedCategory.isEmpty ? null : _selectedCategory,
               decoration: InputDecoration(
                 labelText: 'Category',
                 labelStyle: const TextStyle(color: Colors.white),
@@ -112,8 +167,8 @@ class _TestsPageState extends State<TestsPage> {
                   setState(() {
                     _selectedCategory = value;
                     _questions.clear();
-                    _loadNextQuestion(
-                        value); // Получаем первый вопрос для выбранной категории
+                    _loadAllQuestions(
+                        value); // Получаем все вопросы для выбранной категории
                   });
                 }
               },

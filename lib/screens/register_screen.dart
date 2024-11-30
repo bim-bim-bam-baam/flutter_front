@@ -23,7 +23,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    final Uri url = Uri.parse('$baseUrl/register');
+    final Uri url = Uri.parse('$baseUrl/user/register');
     try {
       final response = await http.post(
         url,
