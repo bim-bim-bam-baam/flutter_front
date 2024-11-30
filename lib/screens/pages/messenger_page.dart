@@ -22,7 +22,7 @@ class _MessengerPageState extends State<MessengerPage> {
   // Маппинг стейтов на более понятные названия
   final Map<String, String> stateLabels = {
     "active": "Chats",
-    "pending-requests": "Inbox",
+    "pending-requests": "Incoming",
     "sent-requests": "Outcoming",
   };
 
