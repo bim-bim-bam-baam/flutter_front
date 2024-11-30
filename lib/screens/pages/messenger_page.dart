@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/constants/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'chat_page.dart';
@@ -31,7 +32,7 @@ class _MessengerPageState extends State<MessengerPage> {
       }
 
       final chatResponse = await http.get(
-        Uri.parse('http://localhost:8080/api/chat/active'),
+        Uri.parse('$baseUrl/chat/active'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -45,7 +46,7 @@ class _MessengerPageState extends State<MessengerPage> {
       for (var chat in chatData) {
         final userId = chat['toUserId'];
         final userResponse = await http.get(
-          Uri.parse('http://localhost:8080/api/user/$userId'),
+          Uri.parse('$baseUrl/user/$userId'),
           headers: {'Authorization': 'Bearer $token'},
         );
 

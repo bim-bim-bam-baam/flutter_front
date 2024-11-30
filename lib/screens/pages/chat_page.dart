@@ -52,7 +52,8 @@ class _ChatPageState extends State<ChatPage> {
       }
 
       final response = await http.get(
-        Uri.parse('http://localhost:8080/api/chat/${widget.chatId}/messages'),
+        Uri.parse(
+            'http://10.124.22.176:8080/api/chat/${widget.chatId}/messages'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
