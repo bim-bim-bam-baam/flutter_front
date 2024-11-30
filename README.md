@@ -62,3 +62,5 @@ flutter doctor
    flutter run
    ```
 ---
+
+Замечание: нужно поменять ip в `lib/constants/constants.dart` на ip сервера бэкенда
