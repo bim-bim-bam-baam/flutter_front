@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/constants/constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatPage extends StatefulWidget {
@@ -10,12 +11,11 @@ class ChatPage extends StatefulWidget {
   final int chatId;
   final String avatar;
 
-  const ChatPage({
-    super.key,
-    required this.chatName,
-    required this.chatId,
-    required this.avatar
-  });
+  const ChatPage(
+      {super.key,
+      required this.chatName,
+      required this.chatId,
+      required this.avatar});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -39,9 +39,60 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   void dispose() {
-    _updateTimer?.cancel(); 
+    _updateTimer?.cancel();
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _uploadImage(XFile imageFile) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('jwt_token');
+
+      if (token == null) {
+        throw Exception('Token is not available');
+      }
+
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/chat/${widget.chatId}/uploadImage'),
+      );
+      request.headers['Authorization'] = 'Bearer $token';
+      request.fields['type'] = 'image';
+      request.files.add(await http.MultipartFile.fromPath(
+        'image',
+        imageFile.path,
+      ));
+
+      final response = await request.send();
+
+      print(response);
+      print(response.statusCode);
+      print(response.headers);
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to upload image');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    }
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+      if (pickedFile != null) {
+        await _uploadImage(pickedFile);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    }
   }
 
   Future<void> _loadMessages() async {
@@ -58,6 +109,8 @@ class _ChatPageState extends State<ChatPage> {
         headers: {'Authorization': 'Bearer $token'},
       );
 
+      print(response.body);
+
       if (response.statusCode != 200) {
         throw Exception('Failed to load messages');
       }
@@ -70,6 +123,7 @@ class _ChatPageState extends State<ChatPage> {
           return {
             'isMe': message['isMe'],
             'content': message['content'],
+            'image': message['image'],
           };
         }).toList();
         isLoading = false;
@@ -127,28 +181,7 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        title: Row(
-          children: [
-            CircleAvatar(
-              backgroundImage: widget.avatar.isNotEmpty
-                  ? NetworkImage(widget.avatar)
-                  : null, 
-              backgroundColor: const Color(0xFF64FFDA),
-              child: widget.avatar.isEmpty
-                  ? const Icon(Icons.person, color: Colors.black)
-                  : null,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              widget.chatName,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        )
+        title: Text(widget.chatName),
       ),
       body: Column(
         children: [
@@ -156,7 +189,8 @@ class _ChatPageState extends State<ChatPage> {
             child: isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF64FFDA)),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(Color(0xFF64FFDA)),
                     ),
                   )
                 : ListView.builder(
@@ -166,7 +200,8 @@ class _ChatPageState extends State<ChatPage> {
                       final message = _messages[index];
                       final isMe = message['isMe'];
                       return Align(
-                        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                        alignment:
+                            isMe ? Alignment.centerRight : Alignment.centerLeft,
                         child: Container(
                           decoration: BoxDecoration(
                             color: isMe
@@ -185,13 +220,18 @@ class _ChatPageState extends State<ChatPage> {
                           ),
                           margin: const EdgeInsets.symmetric(vertical: 8),
                           padding: const EdgeInsets.all(12),
-                          child: Text(
-                            message['content'],
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 16,
-                            ),
-                          ),
+                          child: message['image'] != null
+                              ? Image.network(
+                                  message['image'],
+                                  fit: BoxFit.cover,
+                                )
+                              : Text(
+                                  message['content'],
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 16,
+                                  ),
+                                ),
                         ),
                       );
                     },
@@ -207,6 +247,11 @@ class _ChatPageState extends State<ChatPage> {
             ),
             child: Row(
               children: [
+                IconButton(
+                  icon: const Icon(Icons.photo, color: Colors.white),
+                  onPressed: _pickImage, // Открывает галерею для выбора фото
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: TextField(
                     controller: _controller,
@@ -229,7 +274,7 @@ class _ChatPageState extends State<ChatPage> {
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton(
-                  onPressed: _sendMessage,
+                  onPressed: _sendMessage, // Отправка текста
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF64FFDA),
                     padding: const EdgeInsets.all(16),
