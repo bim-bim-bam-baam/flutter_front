@@ -9,27 +9,61 @@ class PeoplePage extends StatefulWidget {
 
 class _PeoplePageState extends State<PeoplePage> {
   final List<Map<String, dynamic>> _people = [
-    {'name': 'Alice', 'similarity': 95, 'age': 25, 'category': 'Music', 'bio': 'Loves hiking and painting.'},
-    {'name': 'Bob', 'similarity': 88, 'age': 30, 'category': 'Sports', 'bio': 'Enjoys cycling and jazz music.'},
-    {'name': 'Charlie', 'similarity': 80, 'age': 22, 'category': 'Books', 'bio': 'Aspiring chef and foodie.'},
-    {'name': 'Diana', 'similarity': 75, 'age': 27, 'category': 'Movies', 'bio': 'Tech enthusiast and gamer.'},
+    {
+      'name': 'Alice',
+      'similarity': 95,
+      'age': 25,
+      'category': 'Music',
+      'bio': 'Loves hiking and painting.'
+    },
+    {
+      'name': 'Bob',
+      'similarity': 88,
+      'age': 30,
+      'category': 'Sports',
+      'bio': 'Enjoys cycling and jazz music.'
+    },
+    {
+      'name': 'Charlie',
+      'similarity': 80,
+      'age': 22,
+      'category': 'Books',
+      'bio': 'Aspiring chef and foodie.'
+    },
+    {
+      'name': 'Diana',
+      'similarity': 75,
+      'age': 27,
+      'category': 'Movies',
+      'bio': 'Tech enthusiast and gamer.'
+    },
   ];
 
   String _selectedCategory = 'All Categories';
   bool _isDescending = true;
 
-  final List<String> _categories = ['All Categories', 'Music', 'Movies', 'Books', 'Sports'];
+  final List<String> _categories = [
+    'All Categories',
+    'Music',
+    'Movies',
+    'Books',
+    'Sports'
+  ];
 
   @override
   Widget build(BuildContext context) {
     // Фильтруем людей по выбранной категории
-    List<Map<String, dynamic>> filteredPeople = _selectedCategory == 'All Categories'
-        ? _people
-        : _people.where((person) => person['category'] == _selectedCategory).toList();
+    List<Map<String, dynamic>> filteredPeople =
+        _selectedCategory == 'All Categories'
+            ? _people
+            : _people
+                .where((person) => person['category'] == _selectedCategory)
+                .toList();
 
     // Сортируем список по схожести
-    filteredPeople.sort((a, b) =>
-        _isDescending ? b['similarity'].compareTo(a['similarity']) : a['similarity'].compareTo(b['similarity']));
+    filteredPeople.sort((a, b) => _isDescending
+        ? b['similarity'].compareTo(a['similarity'])
+        : a['similarity'].compareTo(b['similarity']));
 
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
@@ -182,7 +216,8 @@ class _PeoplePageState extends State<PeoplePage> {
       barrierDismissible: true,
       builder: (BuildContext context) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           backgroundColor: const Color(0xFF1E1E1E),
           child: Padding(
             padding: const EdgeInsets.all(16.0),

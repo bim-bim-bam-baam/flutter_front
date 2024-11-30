@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../constants/constants.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -23,8 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final Uri url =
-        Uri.parse('http://10.124.22.176:8080/api/user/login'); // URL сервера
+    final Uri url = Uri.parse('$baseUrl/user/login'); // URL сервера
 
     try {
       final response = await http.post(
@@ -134,7 +135,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     decoration: InputDecoration(
                       labelText: 'Username',
                       labelStyle: const TextStyle(color: Colors.white),
-                      prefixIcon: const Icon(Icons.person, color: Color(0xFFBB86FC)),
+                      prefixIcon:
+                          const Icon(Icons.person, color: Color(0xFFBB86FC)),
                       filled: true,
                       fillColor: const Color(0xFF2E2E2E),
                       border: OutlineInputBorder(
@@ -154,7 +156,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     decoration: InputDecoration(
                       labelText: 'Password',
                       labelStyle: const TextStyle(color: Colors.white),
-                      prefixIcon: const Icon(Icons.lock, color: Color(0xFFBB86FC)),
+                      prefixIcon:
+                          const Icon(Icons.lock, color: Color(0xFFBB86FC)),
                       filled: true,
                       fillColor: const Color(0xFF2E2E2E),
                       border: OutlineInputBorder(

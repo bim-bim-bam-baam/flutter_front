@@ -27,17 +27,23 @@ class MyApp extends StatelessWidget {
             fontWeight: FontWeight.bold,
             color: Colors.white, // Белый текст AppBar
           ),
-          iconTheme: IconThemeData(color: Color.fromARGB(255, 3, 173, 162)), // Бирюзовые иконки AppBar
+          iconTheme: IconThemeData(
+              color:
+                  Color.fromARGB(255, 3, 173, 162)), // Бирюзовые иконки AppBar
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           backgroundColor: Colors.black,
-          selectedItemColor: Color.fromARGB(255, 3, 173, 162), // Бирюзовый активный элемент
+          selectedItemColor:
+              Color.fromARGB(255, 3, 173, 162), // Бирюзовый активный элемент
           unselectedItemColor: Colors.purple, // Фиолетовый неактивный элемент
         ),
         textTheme: const TextTheme(
-          bodyMedium: TextStyle(color: Colors.white), // Белый текст по умолчанию
+          bodyMedium:
+              TextStyle(color: Colors.white), // Белый текст по умолчанию
         ),
-        iconTheme: const IconThemeData(color: Color.fromARGB(255, 3, 173, 162)), // Бирюзовые иконки по умолчанию
+        iconTheme: const IconThemeData(
+            color: Color.fromARGB(
+                255, 3, 173, 162)), // Бирюзовые иконки по умолчанию
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.black,
@@ -45,11 +51,12 @@ class MyApp extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             elevation: 10,
-            side: const BorderSide(color: Colors.purple, width: 2), // Фиолетовая рамка кнопок
+            side: const BorderSide(
+                color: Colors.purple, width: 2), // Фиолетовая рамка кнопок
           ),
         ),
       ),
-      initialRoute: '/home',
+      initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
