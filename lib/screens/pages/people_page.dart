@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/constants/constants.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PeoplePage extends StatefulWidget {
   const PeoplePage({super.key});
@@ -8,60 +12,156 @@ class PeoplePage extends StatefulWidget {
 }
 
 class _PeoplePageState extends State<PeoplePage> {
-  final List<Map<String, dynamic>> _people = [
-    {
-      'name': 'Alice',
-      'similarity': 95,
-      'age': 25,
-      'category': 'Music',
-      'bio': 'Loves hiking and painting.'
-    },
-    {
-      'name': 'Bob',
-      'similarity': 88,
-      'age': 30,
-      'category': 'Sports',
-      'bio': 'Enjoys cycling and jazz music.'
-    },
-    {
-      'name': 'Charlie',
-      'similarity': 80,
-      'age': 22,
-      'category': 'Books',
-      'bio': 'Aspiring chef and foodie.'
-    },
-    {
-      'name': 'Diana',
-      'similarity': 75,
-      'age': 27,
-      'category': 'Movies',
-      'bio': 'Tech enthusiast and gamer.'
-    },
-  ];
-
-  String _selectedCategory = 'All Categories';
+  List<Map<String, String?>> _categories = [];
+  List<Map<String, dynamic>> _people = [];
+  int? _selectedCategoryId = 1; // Default to category ID 1
   bool _isDescending = true;
+  bool _isLoading = false;
+  static const String matching_type= "cosine";
 
-  final List<String> _categories = [
-    'All Categories',
-    'Music',
-    'Movies',
-    'Books',
-    'Sports'
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchCategories();
+    _fetchPeople(_selectedCategoryId); // Fetch people for default category
+  }
+
+  Future<void> _sendInvite(String toUserId) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token');
+    if (token == null) {
+      throw Exception('Token is not available');
+    }
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/chat/invite/$toUserId'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      _showSuccessDialog('Invite sent successfully');
+      _fetchPeople(_selectedCategoryId);
+    } else {
+      throw Exception('Failed to send invite: ${response.body}');
+    }
+  } catch (e) {
+    _showErrorDialog('Error sending invite: $e');
+  }
+}
+
+void _showSuccessDialog(String message) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Success'),
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('OK'),
+        ),
+      ],
+    ),
+  );
+}
+  
+  Future<void> _fetchCategories() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('jwt_token');
+      if (token == null) {
+        throw Exception('Token is not available');
+      }
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/category/all'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as List<dynamic>;
+        setState(() {
+          _categories = data.map((e) {
+            final category = e as Map<String, dynamic>;
+            return {
+              'id': category['id']?.toString(),
+              'name': category['name'] as String?,
+            };
+          }).toList();
+          _isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load categories');
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      _showErrorDialog('Error loading categories: $e');
+    }
+  }
+
+  Future<void> _fetchPeople(int? categoryId) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('jwt_token');
+      if (token == null) {
+        throw Exception('Token is not available');
+      }
+
+      final url = '$baseUrl/matching/$matching_type/$categoryId';
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as List<dynamic>;
+        setState(() {
+          _people = data.map((e) => e as Map<String, dynamic>).toList();
+          _isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load people');
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      _showErrorDialog('Error loading people: $e');
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Фильтруем людей по выбранной категории
-    List<Map<String, dynamic>> filteredPeople =
-        _selectedCategory == 'All Categories'
-            ? _people
-            : _people
-                .where((person) => person['category'] == _selectedCategory)
-                .toList();
-
-    // Сортируем список по схожести
-    filteredPeople.sort((a, b) => _isDescending
+    final sortedPeople = List.of(_people);
+    sortedPeople.sort((a, b) => _isDescending
         ? b['similarity'].compareTo(a['similarity'])
         : a['similarity'].compareTo(b['similarity']));
 
@@ -73,10 +173,9 @@ class _PeoplePageState extends State<PeoplePage> {
           children: [
             Row(
               children: [
-                // Фильтр категорий
                 Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedCategory,
+                  child: DropdownButtonFormField<String?>(
+                    value: _selectedCategoryId?.toString(),
                     decoration: InputDecoration(
                       labelText: 'Filter by Category',
                       labelStyle: const TextStyle(color: Colors.white),
@@ -90,23 +189,21 @@ class _PeoplePageState extends State<PeoplePage> {
                     ),
                     dropdownColor: const Color(0xFF1E1E1E),
                     style: const TextStyle(color: Colors.white),
-                    items: _categories
-                        .map((category) => DropdownMenuItem(
-                              value: category,
-                              child: Text(category),
-                            ))
-                        .toList(),
+                    items: _categories.map((category) {
+                      return DropdownMenuItem(
+                        value: category['id'],
+                        child: Text(category['name'] ?? ''),
+                      );
+                    }).toList(),
                     onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          _selectedCategory = value;
-                        });
-                      }
+                      setState(() {
+                        _selectedCategoryId = value != null ? int.tryParse(value) : null;
+                        _fetchPeople(_selectedCategoryId);
+                      });
                     },
                   ),
                 ),
                 const SizedBox(width: 10),
-                // Кнопка сортировки
                 IconButton(
                   icon: Icon(
                     _isDescending ? Icons.arrow_downward : Icons.arrow_upward,
@@ -121,12 +218,25 @@ class _PeoplePageState extends State<PeoplePage> {
               ],
             ),
             const SizedBox(height: 20),
-            // Список людей
-            Expanded(
+            if (_isLoading)
+              const Center(
+                child: CircularProgressIndicator(
+                  color: Color(0xFFBB86FC),
+                ),
+              )
+            else if (sortedPeople.isEmpty)
+              const Center(
+                child: Text(
+                  'No people found for the selected category.',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              )
+            else
+              Expanded(
               child: ListView.builder(
-                itemCount: filteredPeople.length,
+                itemCount: sortedPeople.length,
                 itemBuilder: (context, index) {
-                  final person = filteredPeople[index];
+                  final person = sortedPeople[index];
                   return Container(
                     decoration: BoxDecoration(
                       color: const Color(0xFF1E1E1E),
@@ -144,7 +254,7 @@ class _PeoplePageState extends State<PeoplePage> {
                       leading: CircleAvatar(
                         backgroundColor: const Color(0xFFBB86FC),
                         child: Text(
-                          person['name'][0],
+                          person['username'],
                           style: const TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
@@ -152,7 +262,7 @@ class _PeoplePageState extends State<PeoplePage> {
                         ),
                       ),
                       title: Text(
-                        person['name'],
+                        person['username'],
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -160,7 +270,7 @@ class _PeoplePageState extends State<PeoplePage> {
                         ),
                       ),
                       subtitle: Text(
-                        'Similarity: ${person['similarity']}%\nAge: ${person['age']}',
+                        'Similarity: ${person['similarity']}%',
                         style: const TextStyle(
                           color: Colors.white70,
                         ),
@@ -193,7 +303,7 @@ class _PeoplePageState extends State<PeoplePage> {
                           ],
                         ),
                         onPressed: () {
-                          // Логика отправки сообщения
+                           _sendInvite(person['id'].toString());
                         },
                       ),
                       onTap: () {
@@ -209,7 +319,6 @@ class _PeoplePageState extends State<PeoplePage> {
       ),
     );
   }
-
   void _showPersonDetails(BuildContext context, Map<String, dynamic> person) {
     showDialog(
       context: context,
@@ -235,7 +344,7 @@ class _PeoplePageState extends State<PeoplePage> {
                   radius: 60,
                   backgroundColor: const Color(0xFFBB86FC),
                   child: Text(
-                    person['name'][0],
+                    person['username'],
                     style: const TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
@@ -245,7 +354,7 @@ class _PeoplePageState extends State<PeoplePage> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  person['name'],
+                  person['username'],
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -261,34 +370,10 @@ class _PeoplePageState extends State<PeoplePage> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Text(
-                  'Age: ${person['age']}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    color: Colors.white70,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  'Bio:',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  person['bio'],
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
-                ),
-                const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => {
+                    _sendInvite(person['id'].toString())
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFBB86FC),
                     shape: RoundedRectangleBorder(

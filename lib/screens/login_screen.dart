@@ -114,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  Text(
+                  const Text(
                     'Welcome Back!',
                     style: TextStyle(
                       fontSize: 24,
@@ -122,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Colors.white,
                       shadows: [
                         Shadow(
-                          color: const Color(0xFFBB86FC),
+                          color: Color(0xFFBB86FC),
                           blurRadius: 10,
                         ),
                       ],

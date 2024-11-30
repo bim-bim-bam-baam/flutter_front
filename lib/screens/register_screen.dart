@@ -23,7 +23,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    final Uri url = Uri.parse('$baseUrl/register');
+    final Uri url = Uri.parse('$baseUrl/user/register');
     try {
       final response = await http.post(
         url,
@@ -100,7 +100,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  Text(
+                  const Text(
                     'Create Account',
                     style: TextStyle(
                       fontSize: 24,
@@ -108,7 +108,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       color: Colors.white,
                       shadows: [
                         Shadow(
-                          color: const Color(0xFFBB86FC),
+                          color: Color(0xFFBB86FC),
                           blurRadius: 10,
                         ),
                       ],
