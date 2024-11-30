@@ -39,7 +39,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:8080/api/user/profile'),
+        Uri.parse('$baseUrl/user/profile'),
         headers: {
           'Authorization': 'Bearer $token',
         },

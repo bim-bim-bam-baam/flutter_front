@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/constants/constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -53,7 +54,7 @@ class _ChatPageState extends State<ChatPage> {
       }
 
       final response = await http.get(
-        Uri.parse('http://localhost:8080/api/chat/${widget.chatId}/messages'),
+        Uri.parse('$baseUrl/chat/${widget.chatId}/messages'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -95,7 +96,7 @@ class _ChatPageState extends State<ChatPage> {
       }
 
       final response = await http.post(
-        Uri.parse('http://localhost:8080/api/chat/${widget.chatId}/messages'),
+        Uri.parse('$baseUrl/chat/${widget.chatId}/messages'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
