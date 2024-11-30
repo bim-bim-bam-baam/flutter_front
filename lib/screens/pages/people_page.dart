@@ -129,6 +129,7 @@ void _showSuccessDialog(String message) {
         final data = json.decode(response.body) as List<dynamic>;
         setState(() {
           _people = data.map((e) => e as Map<String, dynamic>).toList();
+          print(data);
           _isLoading = false;
         });
       } else {
@@ -253,13 +254,7 @@ void _showSuccessDialog(String message) {
                     child: ListTile(
                       leading: CircleAvatar(
                         backgroundColor: const Color(0xFFBB86FC),
-                        child: Text(
-                          person['username'],
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        backgroundImage: NetworkImage(person['avatar']),
                       ),
                       title: Text(
                         person['username'],
@@ -343,14 +338,7 @@ void _showSuccessDialog(String message) {
                 CircleAvatar(
                   radius: 60,
                   backgroundColor: const Color(0xFFBB86FC),
-                  child: Text(
-                    person['username'],
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 32,
-                    ),
-                  ),
+                  backgroundImage: NetworkImage(person['avatar']),
                 ),
                 const SizedBox(height: 20),
                 Text(
