@@ -18,6 +18,13 @@ class TestsPage extends StatefulWidget {
   State<TestsPage> createState() => _TestsPageState();
 }
 
+class QuestionItem {
+  final String id;
+  final String content;
+
+  QuestionItem({required this.id, required this.content});
+}
+
 class _TestsPageState extends State<TestsPage> {
   String _selectedCategory = '';
   List<String> _categories = [];
@@ -111,13 +118,17 @@ class _TestsPageState extends State<TestsPage> {
 
   void _initializeSwipeItems() {
     _swipeItems = _questions.map((question) {
+      QuestionItem questionItem = QuestionItem(
+        id: question['id'].toString(), // ID вопроса
+        content: question['content'], // Текст вопроса
+      );
+
       return SwipeItem(
-        content:
-            question['content'], // Используем поле 'content' для отображения
+        content: questionItem, // Храним сам объект вместо строки
         likeAction: () =>
-            _onAnswer(question['id'].toString(), 1), // ID как строка
-        nopeAction: () => _onAnswer(question['id'].toString(), -1),
-        superlikeAction: () => _onAnswer(question['id'].toString(), 0),
+            _onAnswer(questionItem.id, 1), // Используем ID объекта
+        nopeAction: () => _onAnswer(questionItem.id, -1),
+        superlikeAction: () => _onAnswer(questionItem.id, 0),
       );
     }).toList();
 
@@ -132,6 +143,8 @@ class _TestsPageState extends State<TestsPage> {
       print('Token not found');
       return;
     }
+
+    // print(questionId);
 
     try {
       final response = await http.get(
@@ -217,7 +230,10 @@ class _TestsPageState extends State<TestsPage> {
                   : SwipeCards(
                       matchEngine: _matchEngine,
                       itemBuilder: (context, index) {
-                        final question = _swipeItems[index].content as String;
+                        final question =
+                            _swipeItems[index].content.content as String;
+                        final questionId =
+                            _swipeItems[index].content.id as String;
 
                         return Container(
                           decoration: BoxDecoration(
@@ -255,9 +271,10 @@ class _TestsPageState extends State<TestsPage> {
                                 right: 0,
                                 child: Center(
                                   child: ElevatedButton(
-                                    onPressed: () => _onAnswer(
-                                        _swipeItems[index].content.toString(),
-                                        0),
+                                    onPressed: () {
+                                      // _onAnswer(questionId, 0);
+                                      _swipeItems[index].superLike();
+                                    },
                                     child: Text('Не знаю'),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.grey,
