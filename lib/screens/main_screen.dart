@@ -20,7 +20,7 @@ class _MainScreenState extends State<MainScreen> {
     const MessengerPage(), // Messenger
   ];
 
-  final List<String> _titles = ['Tests', 'People', 'Messenger'];
+  final List<String> _titles = ['Questions', 'Matching', 'Messenger'];
 
   @override
   Widget build(BuildContext context) {
@@ -62,11 +62,11 @@ class _MainScreenState extends State<MainScreen> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.library_books),
-            label: 'Tests',
+            label: 'Questions',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.people),
-            label: 'People',
+            label: 'Matching',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
