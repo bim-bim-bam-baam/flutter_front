@@ -25,10 +25,15 @@ class ChatTile extends StatelessWidget {
     }
   }
 
-  Widget _buildActiveChat(BuildContext context) {
-    return Container(
+Widget _buildActiveChat(BuildContext context) {
+  // Локальное состояние
+  bool _isDeclined = false; // Состояние: отклонён ли чат
+  Color _backgroundColor = const Color(0xFF1E1E1E); // Изначальный цвет фона
+
+  return StatefulBuilder(
+    builder: (context, setState) => Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1E1E),
+        color: _isDeclined ? Colors.red : _backgroundColor, // Меняем цвет при отклонении
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -57,22 +62,96 @@ class ChatTile extends StatelessWidget {
             color: Colors.white70,
           ),
         ),
+        trailing: _isDeclined
+            ? null // Если чат отклонён, кнопка не отображается
+            : IconButton(
+                icon: const Icon(Icons.close, color: Colors.red),
+                onPressed: () {
+                  // Показываем диалог подтверждения
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        backgroundColor: const Color(0xFF1E1E1E),
+                        title: const Text(
+                          'Delete this chat?',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        actions: [
+                          TextButton(
+                            child: const Text(
+                              'No',
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Закрыть диалог
+                            },
+                          ),
+                          TextButton(
+                            child: const Text(
+                              'Yes',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                            onPressed: () async {
+                              Navigator.of(context).pop(); // Закрыть диалог
+                              try {
+                                final response = await http.post(
+                                  Uri.parse('$baseUrl/chat/${chat['id']}/decline'),
+                                  headers: {
+                                    'Authorization': 'Bearer $token',
+                                  },
+                                );
+                                if (response.statusCode == 200) {
+                                  // Успешно отклонили чат
+                                  setState(() {
+                                    _isDeclined = true; // Устанавливаем статус отклонения
+                                  });
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Chat declined')),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Failed to decline chat: ${response.body}')),
+                                  );
+                                }
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Error: $e')),
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatPage(chatName: chat['username'], chatId: chat['id'], avatar: chat['avatar']),
-            ),
-          );
+          if (!_isDeclined) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ChatPage(chatName: chat['username'], chatId: chat['id'], avatar: chat['avatar']),
+              ),
+            );
+          }
         },
       ),
-    );
-  }
+    ),
+  );
+}
 
-  Widget _buildPendingRequestChat(BuildContext context) {
-    return Container(
+
+Widget _buildPendingRequestChat(BuildContext context) {
+  // Добавим локальное состояние
+  bool _actionCompleted = false; // Состояние: завершено ли действие
+  Color _backgroundColor = Colors.orange[700]!; // Текущий цвет фона
+
+  return StatefulBuilder(
+    builder: (context, setState) => Container(
       decoration: BoxDecoration(
-        color: Colors.orange[700],
+        color: _actionCompleted ? _backgroundColor : Colors.orange[700], // Меняем цвет в зависимости от действия
         borderRadius: BorderRadius.circular(16),
       ),
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -94,73 +173,84 @@ class ChatTile extends StatelessWidget {
             color: Colors.white70,
           ),
         ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Зеленая кнопка для принятия
-            IconButton(
-              icon: const Icon(Icons.check, color: Colors.green),
-              onPressed: () async {
-                try {
-                  final response = await http.post(
-                    Uri.parse('$baseUrl/chat/${chat['id']}/accept'),
-                    headers: {
-                      'Authorization': 'Bearer $token',
+        trailing: _actionCompleted
+            ? null // Если действие выполнено, кнопки не отображаются
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Зеленая кнопка для принятия
+                  IconButton(
+                    icon: const Icon(Icons.check, color: Colors.green),
+                    onPressed: () async {
+                      try {
+                        final response = await http.post(
+                          Uri.parse('$baseUrl/chat/${chat['id']}/accept'),
+                          headers: {
+                            'Authorization': 'Bearer $token',
+                          },
+                        );
+                        if (response.statusCode == 200) {
+                          setState(() {
+                            _actionCompleted = true; // Действие завершено
+                            _backgroundColor = Colors.green; // Цвет фона — зелёный
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Request accepted')),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Failed to accept request: ${response.body}')),
+                          );
+                        }
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error: $e')),
+                        );
+                      }
                     },
-                  );
-                  if (response.statusCode == 200) {
-                    // Успешно принял запрос, убираем элемент
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Request accepted')),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to accept request: ${response.body}')),
-                    );
-                  }
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
-                  );
-                }
-              },
-            ),
-            // Красная кнопка для отклонения
-            IconButton(
-              icon: const Icon(Icons.close, color: Colors.red),
-              onPressed: () async {
-                try {
-                  final response = await http.post(
-                    Uri.parse('$baseUrl/chat/${chat['id']}/decline'),
-                    headers: {
-                      'Authorization': 'Bearer $token',
+                  ),
+                  // Красная кнопка для отклонения
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.red),
+                    onPressed: () async {
+                      try {
+                        final response = await http.post(
+                          Uri.parse('$baseUrl/chat/${chat['id']}/decline'),
+                          headers: {
+                            'Authorization': 'Bearer $token',
+                          },
+                        );
+                        if (response.statusCode == 200) {
+                          setState(() {
+                            _actionCompleted = true; // Действие завершено
+                            _backgroundColor = Colors.red; // Цвет фона — красный
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Request declined')),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Failed to decline request: ${response.body}')),
+                          );
+                        }
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error: $e')),
+                        );
+                      }
                     },
-                  );
-                  if (response.statusCode == 200) {
-                    // Успешно отклонил запрос, убираем элемент
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Request declined')),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to decline request: ${response.body}')),
-                    );
-                  }
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
-                  );
-                }
-              },
-            ),
-          ],
-        ),
+                  ),
+                ],
+              ),
         onTap: () {
           // Переход в чат (если нужно)
         },
       ),
-    );
-  }
+    ),
+  );
+}
+
+
 
   Widget _buildSentRequestChat(BuildContext context) {
     return Container(
