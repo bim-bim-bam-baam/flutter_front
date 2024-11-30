@@ -1,13 +1,11 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 
 import '../../constants/constants.dart';
-
-import 'dart:convert';
-import 'dart:typed_data';
 
 String decodeUtf8(String input) {
   return utf8.decode(Uint8List.fromList(input.codeUnits));
@@ -20,11 +18,10 @@ class TestsPage extends StatefulWidget {
   State<TestsPage> createState() => _TestsPageState();
 }
 
-// ...
 class _TestsPageState extends State<TestsPage> {
   String _selectedCategory = '';
   List<String> _categories = [];
-  List<String> _questions = [];
+  List<Map<String, dynamic>> _questions = [];
   Map<String, String> _categoryMap = {}; // Map для категории и её ID
   late List<SwipeItem> _swipeItems = [];
   late MatchEngine _matchEngine;
@@ -73,8 +70,6 @@ class _TestsPageState extends State<TestsPage> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('jwt_token');
 
-    print("categoryName: ");
-    print(categoryName);
     final categoryId = _categoryMap[categoryName];
     final intId = int.tryParse(categoryId ?? '0');
 
@@ -83,20 +78,14 @@ class _TestsPageState extends State<TestsPage> {
       return;
     }
 
-    print(categoryId);
-    print(intId);
-
     try {
       final response = await http.get(
-        Uri.parse(
-            '$baseUrl/question/allByCategory?categoryId=$intId'), // Используем query-параметр
+        Uri.parse('$baseUrl/question/remainderByCategory?categoryId=$intId'),
         headers: {
           'Authorization': 'Bearer $token',
         },
       );
 
-      print(response.body);
-      print(response.statusCode);
       if (response.statusCode == 200) {
         final decodedBody = decodeUtf8(response.body);
         final data = json.decode(decodedBody) as List;
@@ -104,9 +93,10 @@ class _TestsPageState extends State<TestsPage> {
         if (data.isNotEmpty) {
           setState(() {
             _questions = data
-                .map((q) => q['content'] != null
-                    ? q['content'] as String
-                    : 'No content available')
+                .map((q) => {
+                      'id': q['id'], // ID вопроса
+                      'content': q['content']
+                    })
                 .toList();
             _initializeSwipeItems();
           });
@@ -119,17 +109,62 @@ class _TestsPageState extends State<TestsPage> {
     }
   }
 
-  // Инициализация карточек для Swipe
   void _initializeSwipeItems() {
     _swipeItems = _questions.map((question) {
       return SwipeItem(
-        content: question,
-        likeAction: () => print('Liked: $question'),
-        nopeAction: () => print('Disliked: $question'),
+        content:
+            question['content'], // Используем поле 'content' для отображения
+        likeAction: () =>
+            _onAnswer(question['id'].toString(), 1), // ID как строка
+        nopeAction: () => _onAnswer(question['id'].toString(), -1),
+        superlikeAction: () => _onAnswer(question['id'].toString(), 0),
       );
     }).toList();
 
     _matchEngine = MatchEngine(swipeItems: _swipeItems);
+  }
+
+  Future<void> _sendAnswer(String questionId, int value) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token');
+
+    if (token == null) {
+      print('Token not found');
+      return;
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse(
+            '$baseUrl/question/setAnswer?questionId=$questionId&result=$value'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Answer saved successfully for question $questionId');
+      } else {
+        print('Failed to save answer: ${response.body}');
+      }
+    } catch (e) {
+      print('Error saving answer: $e');
+    }
+  }
+
+  void _onAnswer(String questionId, int answer) async {
+    if (_swipeItems.isNotEmpty) {
+      await _sendAnswer(questionId, answer);
+
+      setState(() {
+        if (_swipeItems.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No more questions')),
+          );
+        }
+      });
+    }
   }
 
   @override
@@ -184,13 +219,6 @@ class _TestsPageState extends State<TestsPage> {
                       itemBuilder: (context, index) {
                         final question = _swipeItems[index].content as String;
 
-                        // Разделение текста на левые и правые варианты
-                        final parts = question.split(' or ');
-                        final leftOption =
-                            parts.isNotEmpty ? parts[0] : 'Option 1';
-                        final rightOption =
-                            parts.length > 1 ? parts[1] : 'Option 2';
-
                         return Container(
                           decoration: BoxDecoration(
                             color: Colors.black,
@@ -217,6 +245,25 @@ class _TestsPageState extends State<TestsPage> {
                                     fontSize: 28,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              // Кнопка "Не знаю"
+                              Positioned(
+                                bottom: 20,
+                                left: 0,
+                                right: 0,
+                                child: Center(
+                                  child: ElevatedButton(
+                                    onPressed: () => _onAnswer(
+                                        _swipeItems[index].content.toString(),
+                                        0),
+                                    child: Text('Не знаю'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.grey,
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 40, vertical: 10),
+                                    ),
                                   ),
                                 ),
                               ),
