@@ -3,6 +3,8 @@ import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/main_screen.dart';
 import 'screens/pages/messenger_page.dart';
+import 'screens/pages/edit_profile_page.dart';
+import 'screens/pages/settings_page.dart'; // Импорт страницы настроек
 
 void main() {
   runApp(const MyApp());
@@ -28,8 +30,7 @@ class MyApp extends StatelessWidget {
             color: Colors.white, // Белый текст AppBar
           ),
           iconTheme: IconThemeData(
-              color:
-                  Color.fromARGB(255, 3, 173, 162)), // Бирюзовые иконки AppBar
+              color: Color.fromARGB(255, 3, 173, 162)), // Бирюзовые иконки AppBar
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           backgroundColor: Colors.black,
@@ -38,12 +39,10 @@ class MyApp extends StatelessWidget {
           unselectedItemColor: Colors.purple, // Фиолетовый неактивный элемент
         ),
         textTheme: const TextTheme(
-          bodyMedium:
-              TextStyle(color: Colors.white), // Белый текст по умолчанию
+          bodyMedium: TextStyle(color: Colors.white), // Белый текст по умолчанию
         ),
         iconTheme: const IconThemeData(
-            color: Color.fromARGB(
-                255, 3, 173, 162)), // Бирюзовые иконки по умолчанию
+            color: Color.fromARGB(255, 3, 173, 162)), // Бирюзовые иконки по умолчанию
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.black,
@@ -62,6 +61,8 @@ class MyApp extends StatelessWidget {
         '/register': (context) => const RegisterScreen(),
         '/home': (context) => const MainScreen(),
         '/messenger': (context) => const MessengerPage(),
+        '/editProfile': (context) => const EditProfilePage(),
+        '/settings': (context) => const SettingsPage(), // Новый маршрут
       },
     );
   }

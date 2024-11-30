@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/constants/constants.dart';
+import 'package:flutter_application_1/screens/pages/edit_profile_page.dart';
+import 'package:flutter_application_1/screens/pages/settings_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
@@ -165,7 +167,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Flutter Developer',
+                    'Linux Enjoyer',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white70,
@@ -187,7 +189,12 @@ class _ProfilePageState extends State<ProfilePage> {
                         const Color(0xFF1F2937), // Темно-зеленый фон
                     shadowColor: const Color(0xFF64FFDA), // Зеленая тень
                     onTap: () {
-                      // Логика редактирования профиля
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const EditProfilePage(),
+                        ),
+                      );
                     },
                   ),
                   const SizedBox(height: 12),
@@ -198,7 +205,12 @@ class _ProfilePageState extends State<ProfilePage> {
                         const Color(0xFF2D2D34), // Темно-фиолетовый фон
                     shadowColor: const Color(0xFFBB86FC), // Фиолетовая тень
                     onTap: () {
-                      // Логика настроек
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SettingsPage(),
+                        ),
+                      );
                     },
                   ),
                   const SizedBox(height: 12),
@@ -286,8 +298,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 Navigator.of(context).pop(); // Закрыть диалог
                 Navigator.of(context).pushNamedAndRemoveUntil(
                   '/login',
-                  (Route<dynamic> route) =>
-                      false, // Удалить все предыдущие маршруты
+                  (Route<dynamic> route) => false,
                 );
               },
               style: ElevatedButton.styleFrom(
